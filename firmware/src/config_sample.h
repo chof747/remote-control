@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 //WIFI Parameters
-#undef WIFI_SSIF                              
+#undef WIFI_SSID                              
 #define WIFI_SSID                             "WIFI_ID"
 #undef WIFI_PASSWORD                         
 #define WIFI_PASSWORD                         "WIFI_PASSWORD"
