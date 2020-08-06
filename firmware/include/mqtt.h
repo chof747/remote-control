@@ -3,9 +3,14 @@
 
 #include <PubSubClient.h> // Required for MQTT
 
-#define MQTT_SERVER ""
-#define MQTT_USER ""
-#define MQTT_PASSWORD ""
+
+/**
+ * CONFIGURATION NOTE:
+ * 
+ * MQTTSERVER, MQTTUSER, MQTT_PASSWORD must be defined in config.h
+ * please copy the vc'ed file config_sample.h and enter the parameters of your config
+ * 
+ */
 
 #define MQTT_STATS_TOPIC "stat/" MQTT_USER
 
@@ -14,7 +19,7 @@
 // MQTT
 void initializeMQTT();
 void reconnectMQTT();
-void mqttPublish(char* base, const char* topic);
+void mqttPublish(const char* base, const char* topic);
 
 extern char gMqttMessageBuffer[255];
 extern char mqtt_client_id[20];

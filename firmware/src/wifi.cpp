@@ -1,6 +1,6 @@
 #include <ESP8266WiFi.h>        // Include the Wi-Fi library
 #include "wifi.h"
-
+#include "config.h"
 
 bool initWifi()
 {
@@ -16,11 +16,19 @@ bool initWifi()
     return false;
   }
 
+  #ifdef SERIAL_PRINT
+
+    Serial.print("Trying to connect to: ");
+    Serial.println(WIFI_SSID);
+
+  #endif
+
   WiFi.mode(WIFI_STA); 
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   // Wait for connection set amount of intervals
   int num_attempts = 0;
+
   while (WiFi.status() != WL_CONNECTED && num_attempts <= WIFI_CONNECT_MAX_ATTEMPTS)
   {
     delay(WIFI_CONNECT_INTERVAL);
@@ -29,6 +37,9 @@ bool initWifi()
 
   if (WiFi.status() != WL_CONNECTED)
   {
+    #ifdef SERIAL_PRINT
+      Serial.println("Failed to connect to WIFI!");
+    #endif
     return false;
   } else {
   

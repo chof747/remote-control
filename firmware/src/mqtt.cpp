@@ -1,4 +1,5 @@
 #include "mqtt.h"
+#include "config.h"
 
 #include <ESP8266WiFi.h> // ESP8266 WiFi driver
 
@@ -20,14 +21,14 @@ void initializeMQTT()
     client.setBufferSize(255);
 }
 
-char* mqttTopic(char* base, const char* topic) {
+char* mqttTopic(const char* base, const char* topic) {
 //*********************************************************************************
     memset(topicstr, 0, sizeof(topicstr));
     sprintf(topicstr, "%s/%s", base, topic);
     return topicstr;
 }
 
-void mqttPublish(char* base, const char* topic) {
+void mqttPublish(const char* base, const char* topic) {
 //*********************************************************************************
     client.publish(mqttTopic(base, topic), gMqttMessageBuffer);
 }
@@ -43,7 +44,7 @@ void reconnectMQTT()
         while (!client.connected())
         {
             #ifdef SERIAL_PRINT
-              Serial.print("Attempting MQTT connection ... ");
+              Serial.printf("Attempting MQTT connection to %s as %s ... ", MQTT_SERVER, MQTT_USER);
             #endif
             if (client.connect(mqtt_client_id,  MQTT_USER, MQTT_PASSWORD))
             {
