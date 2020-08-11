@@ -10,5 +10,15 @@
 #define MQTT_USER                             "MQTT_USER"
 #define MQTT_PASSWORD                         "MQTT_PASSWORD"
 
+//***********************************************************************************************
+//Button Setup
+#define BUTTON_COUNT    3 //always amount of push buttons for mqtt + 1 for mode button
+#define FIRST_BUTTON    8 
+#define MODE_BUTTON     6 
+
+//***********************************************************************************************
+//MQTT Parameters for Messages
+#define MQTT_PAYLOAD     "TOGGLE"
+#define MQTT_SLEEP_TOPIC
 
 #endif //config.h

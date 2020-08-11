@@ -1,11 +1,14 @@
 #include <Arduino.h>
 #include <Wire.h>
-
+ 
 #include "Adafruit_MCP23017.h"
+#include "Adafruit_GFX.h"
+#include "Adafruit_SSD1306.h"
 #include "wifi.h"
 #include "mqtt.h"
 #include "config.h"
 
+#include "mode_registry.h"
 
 //***********************************************************************************************
 //Controller Setup
@@ -15,17 +18,11 @@
                                         //open the transistor so that a push on one of the buttons
                                         //pulls reset to GND for wakeup.
 
-//***********************************************************************************************
-//Button Setup
-#define BUTTON_COUNT    2
-#define FIRST_BUTTON    8 
-const uint16_t gButtons[BUTTON_COUNT] = {8, 9};
-uint16_t gButtonMask = 0;
 
 //***********************************************************************************************
-//MQTT Parameters for Messages
-#define MQTT_PAYLOAD     "TOGGLE"
-#define MQTT_SLEEP_TOPIC
+// Buttons
+const uint16_t gButtons[BUTTON_COUNT] = {8, 9, MODE_BUTTON};
+uint16_t gButtonMask = 0;
 
 //***********************************************************************************************
 //State Variables
@@ -37,6 +34,8 @@ uint16_t millisSinceLastAction = 0;
 #define clearInterrupts()  while(  mcp.getLastInterruptPinValue() != 255) 
 
 Adafruit_MCP23017 mcp;
+Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
+
 
 void setupGPIOExtender();
 void ICACHE_RAM_ATTR intHandlerButton();
@@ -56,6 +55,7 @@ void rest(uint16_t activeDelay) {
 
     digitalWrite(CONN_LED_PIN, LOW);
     mcp.digitalWrite(WAKE_UP_WATCH_PIN, HIGH);
+    display.ssd1306_command(SSD1306_DISPLAYOFF);
 
     delay(10);
     ESP.deepSleep(0);
@@ -104,19 +104,12 @@ void setupGPIOExtender() {
 
  }   
 
-void broadcastButtonPress(uint8_t button) {
-
-  char topic[6] = "";
-  sprintf(gMqttMessageBuffer, MQTT_PAYLOAD);
-  sprintf(topic, "BTN%02d", button); 
-
-  millisSinceLastAction = 0;
-  mqttPublish(MQTT_STATS_TOPIC, topic);
-}
- 
 void intHandlerButton() {
   deactivateInts();
   noInterrupts();
+
+  //reset the sleep timer
+  millisSinceLastAction = 0;
 
   // Get more information from the MCP from the INT
   uint8_t pin=mcp.getLastInterruptPin();
@@ -124,7 +117,11 @@ void intHandlerButton() {
 
 
   if (val == 0) {
-    broadcastButtonPress(pin - FIRST_BUTTON + 1) ;
+    if (pin == 6) {
+      nextMode();
+    } else {
+      currentMode()->btnPressed(pin - FIRST_BUTTON + 1);
+    }
   }
 
   #ifdef SERIAL_PRINT
@@ -134,6 +131,19 @@ void intHandlerButton() {
   clearInterrupts();
   interrupts();
   activateInts();
+}
+
+void setupDisplay() {
+  display.begin();
+  display.clearDisplay();
+  display.setTextWrap(false);
+  display.setTextSize(2);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  display.print("Hello! gg");
+  display.setCursor(0, 17);
+  display.print("12345678g0123456");
+  display.display();
 }
 
 void setup()
@@ -154,6 +164,10 @@ void setup()
   while (mcp.getLastInterruptPinValue() != 255) {
     delay(0);
   }
+
+  setupDisplay();
+  initializeModes(&display);
+  currentMode()->activate();
  }
 
 void loop()

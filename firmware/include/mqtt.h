@@ -13,6 +13,7 @@
  */
 
 #define MQTT_STATS_TOPIC "stat/" MQTT_USER
+#define MQTT_COMMAND_TOPIC "cmnd/" MQTT_USER 
 
 #define MQTT_STATUS_MESSAGE "{ \"RC\" :  \"%s\", \"STATUS\" : \"%s\" }"
 
