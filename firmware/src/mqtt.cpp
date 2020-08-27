@@ -2,6 +2,7 @@
 #include "config.h"
 
 #include <ESP8266WiFi.h> // ESP8266 WiFi driver
+#include "wifi.h"
 
 void mqttCallback(char *topic, byte *payload, uint8_t length);
 
@@ -55,7 +56,7 @@ void reconnectMQTT()
                 sprintf(gMqttMessageBuffer, MQTT_STATUS_MESSAGE, mqtt_client_id, "active");
                 client.publish(mqttTopic(MQTT_STATS_TOPIC, "STATUS"), gMqttMessageBuffer);
                 // Resubscribe
-                //client.subscribe(g_command_topic);
+                client.subscribe(MQTT_CMND_TOPIC);
             }
             else
             {
@@ -72,21 +73,54 @@ void reconnectMQTT()
     }
 }
 
-/**
-  This callback is invoked when an MQTT message is received. It's not important
-  right now for this project because we don't receive commands via MQTT. You
-  can modify this function to make the device act on commands that you send it.
-*/
+void provideDeviceInfo() {
+    /**
+     * 
+     * Mac - mac Address
+     * IPAddress - ip Address
+     * Version - firmware version + firmware name in paranthesis (e.g. 1.0.1(remote-control))
+     * DeviceName - IT friendly name of the device
+     * FriendlyName - descriptive name
+     * Hardware - hardware type 
+     * 
+     */
+
+    sprintf(gMqttMessageBuffer, 
+      "{\"device\":{\"Mac\":\"%s\",\"IPAddress\":\"%s\",\"Version\":\"%s\",\"DeviceName\":\"%s\",\"FriendlyName\":\"%s\",\"Hardware\":\"%s\"}}",
+      WiFi.macAddress().c_str(),
+      WiFi.localIP().toString().c_str(),
+      "1.0.1(remote-control)",
+      "REMOTE-PT",
+      "Remote Control Prototype",
+      "ESP8266EX"
+      );
+
+    mqttPublish(MQTT_STATS_TOPIC, "STATUS5");
+}
+
 void mqttCallback(char *topic, byte *payload, uint8_t length)
 {
+    char message[length + 1];
+    char command[50];
+
+    memcpy(message, payload, length);
+    message[length] = (char) 0;
+
+    char * token = strtok(topic, "/");
+    while( token != NULL) {
+        strcpy(command,token);
+        token = strtok(NULL,"/");
+    }
 #ifdef SERIAL_PRINT
     Serial.print("Message arrived [");
     Serial.print(topic);
-    Serial.print("] ");
-    for (int i = 0; i < length; i++)
-    {
-        Serial.print((char)payload[i]);
-    }
-    Serial.println();
+    Serial.print("], command =  ");
+    Serial.print(command);
+    Serial.print(":");
+    Serial.println(message);
 #endif
+
+    if ((strcmp(command, "status") == 0) && (strcmp(message, "5") == 0)) {
+        provideDeviceInfo();
+    }
 }

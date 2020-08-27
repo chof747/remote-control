@@ -1,8 +1,9 @@
+#include <Arduino.h>
 #include "mode_registry.h"
 #include "Adafruit_SSD1306.h"
-#include "Arduino.h"
 
 #include "remote.h"
+#include "sensors.h"
 
 uint8_t gCurrentMode;
 ModeController** gModes;
@@ -12,6 +13,7 @@ void initializeModes(Adafruit_SSD1306* display) {
     gModes = new ModeController*[NUM_MODES];
 
     gModes[0] = new RemoteControl(display, 0);
+    gModes[1] = new SensorMonitor(display, 1);
 
 }
 
@@ -28,6 +30,8 @@ uint8_t nextMode() {
     #ifdef SERIAL_PRINT
     Serial.printf("Switching to Mode %d\n", gCurrentMode);
     #endif
+
+    gModes[gCurrentMode]->activate();
 
     return gCurrentMode;
 }

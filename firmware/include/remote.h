@@ -12,6 +12,8 @@ public:
 protected:
 
     virtual bool handleButton(uint8_t btn) override;
+    const char* showLine1() override;
+    void onActivation() override;
 
 };
 

@@ -3,7 +3,7 @@
 
 #include "mode.h"
 
-#define NUM_MODES   1
+#define NUM_MODES   2
 
 class Adafruit_SSD1306;
 

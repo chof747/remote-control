@@ -3,6 +3,9 @@
 ModeController::ModeController(Adafruit_SSD1306 *display, uint8_t mode) {
     attachedDisplay = display;
     modeNumber = mode;
+
+    activation = false;
+    haveToExecute = false;
 }
 
 void ModeController::setModeNumber(uint8_t mode) {
@@ -22,23 +25,42 @@ void ModeController::activate() {
         attachedDisplay->ssd1306_command(SSD1306_DISPLAYON);
     } else {
         attachedDisplay->ssd1306_command(SSD1306_DISPLAYOFF);
+        updateDisplay = false;
     }
+    activation = true;
+}
+
+void ModeController::execute() {
+
+    if (activation == true) {
+        onActivation();
+        activation = false;
+    }
+
+    if (haveToExecute == true) {
+        haveToExecute = onExecution();
+    }
+
 }
  
 bool ModeController::display() {
-    if (useDisplay) {
+    if ((useDisplay) && (updateDisplay))  {
         attachedDisplay->clearDisplay();
 
+        const char* l1 = showLine1();
+        const char* l2 = showLine2();
+
         attachedDisplay->setCursor(0,0);
-        attachedDisplay->print(showLine1());
-
+        attachedDisplay->print(l1);
         attachedDisplay->setCursor(0,17);
-        attachedDisplay->print(showLine2());
+        attachedDisplay->print(l2);
 
-        addGraphics(attachedDisplay);
+        //addGraphics(attachedDisplay);
+        //Serial.println("Added Art");
 
         attachedDisplay->display();
 
+        updateDisplay = false;
         return true;
 
     } else {
@@ -50,7 +72,7 @@ bool ModeController::display() {
 bool ModeController::btnPressed(uint8_t btn){
 
     bool handled = handleButton(btn);
-    display();
+    updateDisplay = true;
 
     return handled;
 }
@@ -62,6 +84,18 @@ const char* ModeController::showLine1() {
 
 const char* ModeController::showLine2() {
     return "";
+}
+
+void ModeController::needExecution() {
+    haveToExecute = true;
+}
+
+void ModeController::onActivation() {
+
+};
+
+bool ModeController::onExecution() {
+    return false;
 }
     
 bool ModeController::addGraphics(Adafruit_SSD1306 *display) {

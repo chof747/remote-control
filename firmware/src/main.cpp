@@ -21,7 +21,7 @@
 
 //***********************************************************************************************
 // Buttons
-const uint16_t gButtons[BUTTON_COUNT] = {8, 9, MODE_BUTTON};
+const uint16_t gButtons[BUTTON_COUNT] = {8, 9, 10, MODE_BUTTON};
 uint16_t gButtonMask = 0;
 
 //***********************************************************************************************
@@ -136,15 +136,11 @@ void intHandlerButton() {
 void setupDisplay() {
   display.begin();
   display.clearDisplay();
-  display.setTextWrap(false);
   display.setTextSize(2);
-  display.setTextColor(WHITE);
-  display.setCursor(0, 0);
-  display.print("Hello! gg");
-  display.setCursor(0, 17);
-  display.print("12345678g0123456");
+  display.setTextWrap(false);
+  display.setTextColor(SSD1306_WHITE);
   display.display();
-}
+} 
 
 void setup()
 {
@@ -170,14 +166,19 @@ void setup()
   currentMode()->activate();
  }
 
+void updateDisplay() {
+  currentMode()->display();
+}
+
 void loop()
 {
   reconnectMQTT();
   //indicate readiness
   digitalWrite(CONN_LED_PIN, HIGH);
+
   client.loop();
-  //mcp.digitalRead(8);
-  //digitalWrite(CONN_LED_PIN, HIGH);
+  currentMode()->execute();
+  updateDisplay();
   
-  rest(1000);
+  rest(10);
 }

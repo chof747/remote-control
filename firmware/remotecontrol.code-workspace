@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "firmware",
+			"path": "."
+		},
+		{
+			"name": "i2c port scanner",
+			"path": "../../../../PlatformIO/Projects/i2c port scanner"
+		}
+	],
+	"settings": {}
+}
