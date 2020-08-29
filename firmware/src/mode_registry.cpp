@@ -4,6 +4,7 @@
 
 #include "remote.h"
 #include "sensors.h"
+#include "battery.h"
 
 uint8_t gCurrentMode;
 ModeController** gModes;
@@ -14,6 +15,7 @@ void initializeModes(Adafruit_SSD1306* display) {
 
     gModes[0] = new RemoteControl(display, 0);
     gModes[1] = new SensorMonitor(display, 1);
+    gModes[2] = new BatteryControl(display, 2);
 
 }
 

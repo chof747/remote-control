@@ -34,15 +34,17 @@ void mqttPublish(const char* base, const char* topic) {
     client.publish(mqttTopic(base, topic), gMqttMessageBuffer);
 }
 
-void reconnectMQTT()
+bool reconnectMQTT()
+//*********************************************************************************
 {
     if (!client.connected())
     {
 
         //set the client ID
         sprintf(mqtt_client_id, "esp8266-%x", ESP.getChipId());
+        int counter = 0;
 
-        while (!client.connected())
+        while ((!client.connected()) && (counter < 5))
         {
             #ifdef SERIAL_PRINT
               Serial.printf("Attempting MQTT connection to %s as %s ... ", MQTT_SERVER, MQTT_USER);
@@ -56,7 +58,7 @@ void reconnectMQTT()
                 sprintf(gMqttMessageBuffer, MQTT_STATUS_MESSAGE, mqtt_client_id, "active");
                 client.publish(mqttTopic(MQTT_STATS_TOPIC, "STATUS"), gMqttMessageBuffer);
                 // Resubscribe
-                client.subscribe(MQTT_CMND_TOPIC);
+                client.subscribe(MQTT_COMMAND_TOPIC_SUBSCRIBE);
             }
             else
             {
@@ -66,14 +68,18 @@ void reconnectMQTT()
                 Serial.println(" try again in 5 seconds");
             #endif
                 // Wait 5 seconds before retrying
-            
                 delay(5000);
             }
+
+            ++counter;
         }
     }
+
+    return client.connected();
 }
 
 void provideDeviceInfo() {
+//*********************************************************************************
     /**
      * 
      * Mac - mac Address
