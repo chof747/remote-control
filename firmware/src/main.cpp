@@ -37,15 +37,17 @@ Adafruit_MCP23017 mcp;
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 
 
-void setupGPIOExtender();
 void ICACHE_RAM_ATTR intHandlerButton();
 
 
-void rest(uint16_t activeDelay) {
+void rest(uint16_t activeDelay) 
+//*********************************************************************************
+{
 
   millisSinceLastAction += activeDelay;
 
-  if (millisSinceLastAction >= DEEP_SLEEP_AFTER) {
+  if (millisSinceLastAction >= DEEP_SLEEP_AFTER) 
+  {
     #ifdef SERIAL_PRINT
     Serial.println("Going to Sleep!");
     #endif
@@ -59,13 +61,17 @@ void rest(uint16_t activeDelay) {
 
     delay(10);
     ESP.deepSleep(0);
-  } else {
+  } 
+  else 
+  {
     delay(activeDelay);
   }
 
 }
 
-void setupGPIOExtender() {
+void setupGPIOExtender()
+//*********************************************************************************
+{
 
   /**
    *  Description of the approach as it caused some headheache during development:
@@ -82,7 +88,8 @@ void setupGPIOExtender() {
   mcp.setupInterrupts(true,false,LOW);
 
   //BUTTONS
-  for(int i=0;i<BUTTON_COUNT;i++) {
+  for(int i=0;i<BUTTON_COUNT;i++) 
+  {
 
     uint16_t b = gButtons[i];
 
@@ -100,11 +107,80 @@ void setupGPIOExtender() {
   #endif
   
   activateInts();
+}   
+
+void setupNetwork() 
+//*********************************************************************************
+{
+  initWifi();
+  initializeMQTT();
+  if (!reconnectMQTT())
+  {
+    ESP.restart();
+  }
+}
 
 
- }   
+void setupDisplay() 
+//*********************************************************************************
+{
+  display.begin();
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextWrap(false);
+  display.setTextColor(SSD1306_WHITE);
+  display.display();
+} 
 
-void intHandlerButton() {
+void setup()
+//*********************************************************************************
+{
+#ifdef SERIAL_PRINT
+  Serial.begin(9600);
+  Serial.println("Initializing ...");
+#endif 
+
+  //setup power on led
+  pinMode(CONN_LED_PIN, OUTPUT);
+  pinMode(A0, INPUT);
+ 
+  setupGPIOExtender();
+  setupNetwork();
+  
+  //clear the interrupt
+  while (mcp.getLastInterruptPinValue() != 255) 
+  {
+    delay(0);
+  }
+
+  setupDisplay();
+  initializeModes(&display);
+  currentMode()->activate();
+ }
+
+void updateDisplay() 
+//*********************************************************************************
+{
+  currentMode()->display();
+}
+
+void loop()
+//*********************************************************************************
+{
+  reconnectMQTT();
+  //indicate readiness
+  digitalWrite(CONN_LED_PIN, HIGH);
+
+  client.loop();
+  currentMode()->execute();
+  updateDisplay();
+  
+  rest(10);
+}
+
+void intHandlerButton() 
+//*********************************************************************************
+{
   deactivateInts();
   noInterrupts();
 
@@ -116,10 +192,14 @@ void intHandlerButton() {
   uint8_t val=mcp.getLastInterruptPinValue();
 
 
-  if (val == 0) {
-    if (pin == 6) {
+  if (val == 0) 
+  {
+    if (pin == 6) 
+    {
       nextMode();
-    } else {
+    } 
+    else 
+    {
       currentMode()->btnPressed(pin - FIRST_BUTTON + 1);
     }
   }
@@ -131,54 +211,4 @@ void intHandlerButton() {
   clearInterrupts();
   interrupts();
   activateInts();
-}
-
-void setupDisplay() {
-  display.begin();
-  display.clearDisplay();
-  display.setTextSize(2);
-  display.setTextWrap(false);
-  display.setTextColor(SSD1306_WHITE);
-  display.display();
-} 
-
-void setup()
-{
-#ifdef SERIAL_PRINT
-  Serial.begin(9600);
-  Serial.println("Initializing ...");
-#endif 
-
-  //setup power on led
-  pinMode(CONN_LED_PIN, OUTPUT);
- 
-  setupGPIOExtender();
-
-  initWifi();
-  initializeMQTT();
-
-  while (mcp.getLastInterruptPinValue() != 255) {
-    delay(0);
-  }
-
-  setupDisplay();
-  initializeModes(&display);
-  currentMode()->activate();
- }
-
-void updateDisplay() {
-  currentMode()->display();
-}
-
-void loop()
-{
-  reconnectMQTT();
-  //indicate readiness
-  digitalWrite(CONN_LED_PIN, HIGH);
-
-  client.loop();
-  currentMode()->execute();
-  updateDisplay();
-  
-  rest(10);
 }
