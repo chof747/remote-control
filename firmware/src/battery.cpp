@@ -65,6 +65,7 @@ void BatteryControl::onActivation()
       percent, voltage, adcValue);
 
     mqttPublish(MQTT_TELE_TOPIC, "BATTERY");
+    updateDisplay = true;
 }
 
 void BatteryControl::readVoltage() 
