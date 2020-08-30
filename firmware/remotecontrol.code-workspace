@@ -1,15 +1,16 @@
 {
 	"folders": [
 		{
-			"path": ".."
-		},
-		{
-			"name": "firmware",
+			"name": "remote control firmware",
 			"path": "."
 		},
 		{
 			"name": "i2c port scanner",
 			"path": "../../../../PlatformIO/Projects/i2c port scanner"
+		},
+		{
+			"name": "EEPROM Test",
+			"path": "../../../../PlatformIO/Projects/EEPROM Test"
 		}
 	],
 	"settings": {}
