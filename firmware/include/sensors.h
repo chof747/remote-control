@@ -36,7 +36,8 @@ private:
     sensor_t* iterator;
 
     void clearSensors();
-    void obtainSensors();
+    sensor_t* readSensorDefinition(char* line, sensor_t* pre);
+    void obtainSensors(bool forceReread = false);
     char* readSensor();
 
 };
