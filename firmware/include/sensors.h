@@ -3,12 +3,15 @@
 
 #include "mode.h"
 
-struct sensor_t {
-    char* name;
-    const char* url;
-    char* value;
 
-    sensor_t* next;
+struct sensor_description_main_t {
+    char prefix[15]; //the prefix after the server url before the specific part of the sensor URL
+    char number[2];  //the number of sensors 
+};
+
+struct sensor_t {
+    char name[8];
+    char path[24];
 };
 
 class SensorMonitor: public ModeController {
@@ -31,13 +34,18 @@ private:
     bool sensorSwitch;
     char* currentSensorName;
     char* currentSensorReading;
+    int currentSensor;
 
-    sensor_t* firstSensor;
-    sensor_t* iterator;
+    sensor_description_main_t sensorMain;
+    sensor_t* sensors;
+    char** values;
 
+  
     void clearSensors();
+    void createSensors(int count);
     sensor_t* readSensorDefinition(char* line, sensor_t* pre);
-    void obtainSensors(bool forceReread = false);
+    void obtainSensors();
+
     char* readSensor();
 
 };

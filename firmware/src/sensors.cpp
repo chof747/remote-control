@@ -3,126 +3,123 @@
 
 #include "sensors.h"
 #include "config.h"
+#include <EEPROM.h>
 
 #define NEXT_SENSOR_BTN 1
 #define REMOTE_MODE_BTN 2
 
-SensorMonitor::SensorMonitor(Adafruit_SSD1306 *display, uint8_t mode) : ModeController::ModeController(display, mode)
+#define EEPROM_HEADER   0xFABC
+
+void rtrim(char* s, int length) 
+//*********************************************************************************
+{
+    char* ptr = s + length - 1;
+    while (*ptr == ' ')
+    {
+        --ptr;
+    }
+
+    *(++ptr) = '\0';
+}
+
+SensorMonitor::SensorMonitor(Adafruit_SSD1306 *display, uint8_t mode) : 
+    ModeController::ModeController(display, mode)
+//*********************************************************************************
 {
 
     enableDisplay(true);
 
+    sensors = NULL;
+
     currentSensorName = NULL;
     currentSensorReading = NULL;
-    firstSensor = NULL;
+    currentSensor = 0;
 
     sensorSwitch = false;
 }
 
 void SensorMonitor::clearSensors()
 {
-
-    while (firstSensor != NULL)
+    if (sensors != NULL) 
     {
-        sensor_t *ix = firstSensor;
-        firstSensor = firstSensor->next;
-
-        delete ix->name;
-        delete ix->url;
-        delete ix->value;
-        delete ix;
+        delete sensors;
+        for(int i=0;i<sizeof(values); ++i) 
+        {
+            delete values[i];
+        }
+        delete values;
     }
-
-    firstSensor = NULL;
 }
 
-void SensorMonitor::obtainSensors(bool forceReread)
+void SensorMonitor::createSensors(int count) 
 //*********************************************************************************
 {
-    if (forceReread) 
+    sensors = new sensor_t[count];
+    values  = new char*[count];
+    for(int i=0; i<count;++i) 
     {
-        clearSensors();
+        values[i] = new char[12];
+    }
+}
 
+void SensorMonitor::obtainSensors()
+//*********************************************************************************
+{
+    clearSensors();
+
+    #ifdef SERIAL_PRINT
         Serial.println("Getting Sensor List ...");
+    #endif
 
-        HTTPClient client;
-        client.begin(SENSOR_LIST_URL);
-        int httpCode = client.GET(); //Send the request
-        WiFiClient *stream = client.getStreamPtr();
+    HTTPClient client;
+    client.begin(SENSOR_LIST_URL);
+    int httpCode = client.GET(); //Send the request
 
-        char line[80];
-        sensor_t *ix = NULL;
+    String payload = client.getString();
+    const char* payload_ptr = payload.c_str();
 
-        while (int size = stream->readBytesUntil(char(10), line, 80))
-        {
-            line[size] = '\0';
-            ix = readSensorDefinition(line, ix);
-        }
+    memcpy(&sensorMain, payload_ptr, sizeof(sensorMain));
+    rtrim(sensorMain.prefix, 15);
+    int count = atoi(sensorMain.number);
 
-        iterator = NULL;
-        Serial.println(httpCode);
-    }
-}
+    createSensors(count);
 
-sensor_t *SensorMonitor::readSensorDefinition(char *line, sensor_t *pre)
-//*********************************************************************************
-{
-    char *l = line;
-    char *token;
-    char *sensorName = NULL;
-    char *sensorUrl = NULL;
+    payload_ptr += sizeof(sensorMain);
 
-    while ((token = strsep(&l, "|")) != NULL)
+    size_t s = sizeof(sensor_t);
+
+    for(int i=0; i<count; ++i) 
     {
-
-        if (sensorName == NULL)
-        {
-            //first comes the sensor name
-            sensorName = strdup(token);
-        }
-        else
-        {
-            sensorUrl = strdup(token);
-        }
+        memcpy(&sensors[i], payload_ptr, s);
+        rtrim(sensors[i].name, 8);
+        rtrim(sensors[i].path, 24);
+    
+        payload_ptr += s;
     }
 
-    sensor_t *sensor = new sensor_t();
-    sensor->name = sensorName;
-    sensor->url = sensorUrl;
-    sensor->next = NULL;
-
-    if (pre == NULL)
-    {
-        pre = sensor;
-        firstSensor = pre;
-    }
-    else
-    {
-        pre->next = sensor;
-        pre = sensor;
-    }
-
-    return pre;
+    currentSensor = count - 1 ;
 }
 
 char *SensorMonitor::readSensor()
+//*********************************************************************************
 {
     HTTPClient client;
     char url[100];
-    sprintf(url, "%s%s", SENSOR_URL_BASE, iterator->url);
+    sprintf(url, "%s%s/%s", SENSOR_URL_BASE, sensorMain.prefix, sensors[currentSensor].path);
 
     client.begin(url);
     int httpCode = client.GET();
     Serial.printf("HTTP-Return Code: %d", httpCode);
     if (httpCode == 200)
     {
-        iterator->value = strdup(client.getString().c_str());
+        strcpy(values[currentSensor], client.getString().c_str());
     }
 
-    return iterator->value;
+    return values[currentSensor];
 }
 
 bool SensorMonitor::handleButton(uint8_t btn)
+//*********************************************************************************
 {
 
     Serial.printf("Button: %d\n", btn);
@@ -133,14 +130,15 @@ bool SensorMonitor::handleButton(uint8_t btn)
         Serial.print("Switching to next sensor reading!");
 #endif
 
-        if ((iterator == NULL) || (iterator->next == NULL))
+        if (currentSensor < sizeof(sensors))
         {
-            iterator = firstSensor;
+            ++currentSensor;
         }
         else
         {
-            iterator = iterator->next;
+            currentSensor = 0;
         }
+        
 
         needExecution();
     }
@@ -149,25 +147,27 @@ bool SensorMonitor::handleButton(uint8_t btn)
 }
 
 bool SensorMonitor::onExecution()
+//*********************************************************************************
 {
 
 #ifdef SERIAL_PRINT
-    Serial.printf("Reading  Sensor: %s", iterator->name);
+    Serial.printf("Reading  Sensor: %s", sensors[currentSensor].name);
 #endif
 
-    currentSensorName = iterator->name;
+    currentSensorName = sensors[currentSensor].name;
     currentSensorReading = readSensor();
 
     return false;
 }
 
 void SensorMonitor::onActivation()
+//*********************************************************************************
 {
 #ifdef SERIAL_PRINT
     Serial.println("Activating Sensor Reading Mode ...");
 #endif
 
-    obtainSensors(true);
+    obtainSensors();
 
     updateDisplay = true;
     currentSensorReading = NULL;
@@ -176,6 +176,7 @@ void SensorMonitor::onActivation()
 }
 
 const char *SensorMonitor::showLine1()
+//*********************************************************************************
 {
     if (currentSensorName == NULL)
     {
@@ -188,6 +189,7 @@ const char *SensorMonitor::showLine1()
 }
 
 const char *SensorMonitor::showLine2()
+//*********************************************************************************
 {
     if (currentSensorName == NULL)
     {

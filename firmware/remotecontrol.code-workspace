@@ -13,5 +13,10 @@
 			"path": "../../../../PlatformIO/Projects/EEPROM Test"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"array": "cpp",
+			"initializer_list": "cpp"
+		}
+	}
 }
