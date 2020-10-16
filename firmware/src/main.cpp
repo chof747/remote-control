@@ -11,18 +11,9 @@
 #include "mode_registry.h"
 
 //***********************************************************************************************
-//Controller Setup
-#define CONN_LED_PIN     D6
-#define DEEP_SLEEP_AFTER 10000          //milliseconds until deep sleep
-#define WAKE_UP_WATCH_PIN 7             //the pin on the mcp that is pulled high on sleep to 
-                                        //open the transistor so that a push on one of the buttons
-                                        //pulls reset to GND for wakeup.
-
-
-//***********************************************************************************************
 // Buttons
-const uint16_t gButtons[BUTTON_COUNT] = {8, 9, 10, MODE_BUTTON};
 uint16_t gButtonMask = 0;
+uint16_t gButtons[BUTTON_COUNT];
 
 //***********************************************************************************************
 //State Variables
@@ -69,6 +60,17 @@ void rest(uint16_t activeDelay)
 
 }
 
+void setupButtonArray()
+{
+  for(int i=0;i<BUTTON_COUNT-1;i++)
+  {
+    gButtons[i] = FIRST_BUTTON + i;
+  }
+
+  //mode button comes last:
+  gButtons[BUTTON_COUNT-1] = MODE_BUTTON;
+}
+
 void setupGPIOExtender()
 //*********************************************************************************
 {
@@ -86,6 +88,8 @@ void setupGPIOExtender()
   mcp.digitalWrite(WAKE_UP_WATCH_PIN, LOW);
 
   mcp.setupInterrupts(true,false,LOW);
+
+  setupButtonArray();
 
   //BUTTONS
   for(int i=0;i<BUTTON_COUNT;i++) 
@@ -194,7 +198,7 @@ void intHandlerButton()
 
   if (val == 0) 
   {
-    if (pin == 6) 
+    if (pin == MODE_BUTTON) 
     {
       nextMode();
     } 

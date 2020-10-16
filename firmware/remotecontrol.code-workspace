@@ -1,22 +1,10 @@
 {
-	"folders": [
-		{
-			"name": "remote control firmware",
-			"path": "."
-		},
-		{
-			"name": "i2c port scanner",
-			"path": "../../../../PlatformIO/Projects/i2c port scanner"
-		},
-		{
-			"name": "EEPROM Test",
-			"path": "../../../../PlatformIO/Projects/EEPROM Test"
-		}
-	],
-	"settings": {
-		"files.associations": {
-			"array": "cpp",
-			"initializer_list": "cpp"
-		}
-	}
+    "folders": [
+        {
+            "path": "."
+        },
+        {
+            "path": "../../../../PlatformIO/Projects/OTA Firmware test"
+        }
+    ]
 }

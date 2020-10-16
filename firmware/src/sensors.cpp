@@ -3,12 +3,9 @@
 
 #include "sensors.h"
 #include "config.h"
-#include <EEPROM.h>
 
 #define NEXT_SENSOR_BTN 1
 #define REMOTE_MODE_BTN 2
-
-#define EEPROM_HEADER   0xFABC
 
 void rtrim(char* s, int length) 
 //*********************************************************************************
@@ -122,7 +119,7 @@ bool SensorMonitor::handleButton(uint8_t btn)
 //*********************************************************************************
 {
 
-    Serial.printf("Button: %d\n", btn);
+    Serial.printf("Button: %d, %d\n", btn);
 
     if (btn == NEXT_SENSOR_BTN)
     {
