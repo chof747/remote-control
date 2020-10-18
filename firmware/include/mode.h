@@ -17,6 +17,7 @@ public:
 
     uint8_t getModeNumber();
     void setModeNumber(uint8_t mode);
+    virtual void onMessage(const char* topic, const char* command, const char* message);
 
 protected: 
 

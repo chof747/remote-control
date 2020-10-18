@@ -117,7 +117,7 @@ void setupNetwork()
 //*********************************************************************************
 {
   initWifi();
-  initializeMQTT();
+  initializeMQTT(mqttCallback);
   if (!reconnectMQTT())
   {
     ESP.restart();
@@ -150,12 +150,15 @@ void setup()
  
   setupGPIOExtender();
   setupNetwork();
-  
+
   //clear the interrupt
+
+#ifndef NO_INTERRUPTS
   while (mcp.getLastInterruptPinValue() != 255) 
   {
     delay(0);
   }
+#endif
 
   setupDisplay();
   initializeModes(&display);
@@ -176,7 +179,7 @@ void loop()
   digitalWrite(CONN_LED_PIN, HIGH);
 
   client.loop();
-  currentMode()->execute();
+  //currentMode()->execute();
   updateDisplay();
   
   rest(10);

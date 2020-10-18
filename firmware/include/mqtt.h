@@ -3,6 +3,7 @@
 
 
 #include <PubSubClient.h> // Required for MQTT
+#include "config.h"
 
 
 /**
@@ -21,7 +22,7 @@
 #define MQTT_STATUS_MESSAGE "{ \"RC\" :  \"%s\", \"STATUS\" : \"%s\" }"
 
 // MQTT
-void initializeMQTT();
+void initializeMQTT(MQTT_CALLBACK_SIGNATURE);
 bool reconnectMQTT();
 void mqttPublish(const char* base, const char* topic);
 

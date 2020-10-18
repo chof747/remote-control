@@ -97,6 +97,10 @@ void ModeController::onActivation() {
 bool ModeController::onExecution() {
     return false;
 }
+
+void ModeController::onMessage(const char* topic, const char* command, const char* message) {
+
+}
     
 bool ModeController::addGraphics(Adafruit_SSD1306 *display) {
     return false;
