@@ -179,7 +179,7 @@ void loop()
   digitalWrite(CONN_LED_PIN, HIGH);
 
   client.loop();
-  //currentMode()->execute();
+  currentMode()->execute();
   updateDisplay();
   
   rest(10);
