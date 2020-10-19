@@ -2,8 +2,7 @@
 #include "config.h"
 
 #include <ESP8266WiFi.h> // ESP8266 WiFi driver
-
-void mqttCallback(char *topic, byte *payload, uint8_t length);
+#include "wifi.h"
 
 char topicstr[100];
 char gMqttMessageBuffer[255];
@@ -12,12 +11,12 @@ char mqtt_client_id[20];
 WiFiClient esp_client;
 PubSubClient client(esp_client);
 
-void initializeMQTT()
+void initializeMQTT(MQTT_CALLBACK_SIGNATURE)
 //*********************************************************************************
 {
 
     client.setServer(MQTT_SERVER, 1883);
-    client.setCallback(mqttCallback);
+    client.setCallback(callback);
     client.setBufferSize(255);
 }
 
@@ -33,15 +32,17 @@ void mqttPublish(const char* base, const char* topic) {
     client.publish(mqttTopic(base, topic), gMqttMessageBuffer);
 }
 
-void reconnectMQTT()
+bool reconnectMQTT()
+//*********************************************************************************
 {
     if (!client.connected())
     {
 
         //set the client ID
         sprintf(mqtt_client_id, "esp8266-%x", ESP.getChipId());
+        int counter = 0;
 
-        while (!client.connected())
+        while ((!client.connected()) && (counter < 5))
         {
             #ifdef SERIAL_PRINT
               Serial.printf("Attempting MQTT connection to %s as %s ... ", MQTT_SERVER, MQTT_USER);
@@ -55,7 +56,8 @@ void reconnectMQTT()
                 sprintf(gMqttMessageBuffer, MQTT_STATUS_MESSAGE, mqtt_client_id, "active");
                 client.publish(mqttTopic(MQTT_STATS_TOPIC, "STATUS"), gMqttMessageBuffer);
                 // Resubscribe
-                //client.subscribe(g_command_topic);
+                Serial.println(MQTT_COMMAND_TOPIC_SUBSCRIBE);
+                client.subscribe(MQTT_COMMAND_TOPIC_SUBSCRIBE);
             }
             else
             {
@@ -65,28 +67,13 @@ void reconnectMQTT()
                 Serial.println(" try again in 5 seconds");
             #endif
                 // Wait 5 seconds before retrying
-            
                 delay(5000);
             }
+
+            ++counter;
         }
     }
+
+    return client.connected();
 }
 
-/**
-  This callback is invoked when an MQTT message is received. It's not important
-  right now for this project because we don't receive commands via MQTT. You
-  can modify this function to make the device act on commands that you send it.
-*/
-void mqttCallback(char *topic, byte *payload, uint8_t length)
-{
-#ifdef SERIAL_PRINT
-    Serial.print("Message arrived [");
-    Serial.print(topic);
-    Serial.print("] ");
-    for (int i = 0; i < length; i++)
-    {
-        Serial.print((char)payload[i]);
-    }
-    Serial.println();
-#endif
-}

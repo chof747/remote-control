@@ -1,7 +1,9 @@
 #ifndef MQTT_H
 #define MQTT_H
 
+
 #include <PubSubClient.h> // Required for MQTT
+#include "config.h"
 
 
 /**
@@ -13,12 +15,15 @@
  */
 
 #define MQTT_STATS_TOPIC "stat/" MQTT_USER
+#define MQTT_COMMAND_TOPIC "cmnd/" MQTT_USER 
+#define MQTT_TELE_TOPIC "tele/" MQTT_USER 
+#define MQTT_COMMAND_TOPIC_SUBSCRIBE MQTT_COMMAND_TOPIC "/#"
 
 #define MQTT_STATUS_MESSAGE "{ \"RC\" :  \"%s\", \"STATUS\" : \"%s\" }"
 
 // MQTT
-void initializeMQTT();
-void reconnectMQTT();
+void initializeMQTT(MQTT_CALLBACK_SIGNATURE);
+bool reconnectMQTT();
 void mqttPublish(const char* base, const char* topic);
 
 extern char gMqttMessageBuffer[255];

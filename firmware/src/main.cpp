@@ -1,31 +1,19 @@
 #include <Arduino.h>
 #include <Wire.h>
-
+ 
 #include "Adafruit_MCP23017.h"
+#include "Adafruit_GFX.h"
+#include "Adafruit_SSD1306.h"
 #include "wifi.h"
 #include "mqtt.h"
 #include "config.h"
 
+#include "mode_registry.h"
 
 //***********************************************************************************************
-//Controller Setup
-#define CONN_LED_PIN     D6
-#define DEEP_SLEEP_AFTER 10000          //milliseconds until deep sleep
-#define WAKE_UP_WATCH_PIN 7             //the pin on the mcp that is pulled high on sleep to 
-                                        //open the transistor so that a push on one of the buttons
-                                        //pulls reset to GND for wakeup.
-
-//***********************************************************************************************
-//Button Setup
-#define BUTTON_COUNT    2
-#define FIRST_BUTTON    8 
-const uint16_t gButtons[BUTTON_COUNT] = {8, 9};
+// Buttons
 uint16_t gButtonMask = 0;
-
-//***********************************************************************************************
-//MQTT Parameters for Messages
-#define MQTT_PAYLOAD     "TOGGLE"
-#define MQTT_SLEEP_TOPIC
+uint16_t gButtons[BUTTON_COUNT];
 
 //***********************************************************************************************
 //State Variables
@@ -37,16 +25,20 @@ uint16_t millisSinceLastAction = 0;
 #define clearInterrupts()  while(  mcp.getLastInterruptPinValue() != 255) 
 
 Adafruit_MCP23017 mcp;
+Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 
-void setupGPIOExtender();
+
 void ICACHE_RAM_ATTR intHandlerButton();
 
 
-void rest(uint16_t activeDelay) {
+void rest(uint16_t activeDelay) 
+//*********************************************************************************
+{
 
   millisSinceLastAction += activeDelay;
 
-  if (millisSinceLastAction >= DEEP_SLEEP_AFTER) {
+  if (millisSinceLastAction >= DEEP_SLEEP_AFTER) 
+  {
     #ifdef SERIAL_PRINT
     Serial.println("Going to Sleep!");
     #endif
@@ -56,16 +48,32 @@ void rest(uint16_t activeDelay) {
 
     digitalWrite(CONN_LED_PIN, LOW);
     mcp.digitalWrite(WAKE_UP_WATCH_PIN, HIGH);
+    display.ssd1306_command(SSD1306_DISPLAYOFF);
 
     delay(10);
     ESP.deepSleep(0);
-  } else {
+  } 
+  else 
+  {
     delay(activeDelay);
   }
 
 }
 
-void setupGPIOExtender() {
+void setupButtonArray()
+{
+  for(int i=0;i<BUTTON_COUNT-1;i++)
+  {
+    gButtons[i] = FIRST_BUTTON + i;
+  }
+
+  //mode button comes last:
+  gButtons[BUTTON_COUNT-1] = MODE_BUTTON;
+}
+
+void setupGPIOExtender()
+//*********************************************************************************
+{
 
   /**
    *  Description of the approach as it caused some headheache during development:
@@ -81,8 +89,11 @@ void setupGPIOExtender() {
 
   mcp.setupInterrupts(true,false,LOW);
 
+  setupButtonArray();
+
   //BUTTONS
-  for(int i=0;i<BUTTON_COUNT;i++) {
+  for(int i=0;i<BUTTON_COUNT;i++) 
+  {
 
     uint16_t b = gButtons[i];
 
@@ -100,31 +111,104 @@ void setupGPIOExtender() {
   #endif
   
   activateInts();
+}   
 
-
- }   
-
-void broadcastButtonPress(uint8_t button) {
-
-  char topic[6] = "";
-  sprintf(gMqttMessageBuffer, MQTT_PAYLOAD);
-  sprintf(topic, "BTN%02d", button); 
-
-  millisSinceLastAction = 0;
-  mqttPublish(MQTT_STATS_TOPIC, topic);
+void setupNetwork() 
+//*********************************************************************************
+{
+  initWifi();
+  initializeMQTT(mqttCallback);
+  if (!reconnectMQTT())
+  {
+    ESP.restart();
+  }
 }
+
+
+void setupDisplay() 
+//*********************************************************************************
+{
+  display.begin();
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextWrap(false);
+  display.setTextColor(SSD1306_WHITE);
+  display.display();
+} 
+
+void setup()
+//*********************************************************************************
+{
+#ifdef SERIAL_PRINT
+  Serial.begin(9600);
+  Serial.println("Initializing ...");
+#endif 
+
+  //setup power on led
+  pinMode(CONN_LED_PIN, OUTPUT);
+  pinMode(A0, INPUT);
  
-void intHandlerButton() {
+  setupGPIOExtender();
+  setupNetwork();
+
+  //clear the interrupt
+
+#ifndef NO_INTERRUPTS
+  while (mcp.getLastInterruptPinValue() != 255) 
+  {
+    delay(0);
+  }
+#endif
+
+  setupDisplay();
+  initializeModes(&display);
+  currentMode()->activate();
+ }
+
+void updateDisplay() 
+//*********************************************************************************
+{
+  currentMode()->display();
+}
+
+void loop()
+//*********************************************************************************
+{
+  reconnectMQTT();
+  //indicate readiness
+  digitalWrite(CONN_LED_PIN, HIGH);
+
+  client.loop();
+  currentMode()->execute();
+  updateDisplay();
+  
+  rest(LOOP_DELAY);
+}
+
+void intHandlerButton() 
+//*********************************************************************************
+{
   deactivateInts();
   noInterrupts();
+
+  //reset the sleep timer
+  millisSinceLastAction = 0;
 
   // Get more information from the MCP from the INT
   uint8_t pin=mcp.getLastInterruptPin();
   uint8_t val=mcp.getLastInterruptPinValue();
 
 
-  if (val == 0) {
-    broadcastButtonPress(pin - FIRST_BUTTON + 1) ;
+  if (val == 0) 
+  {
+    if (pin == MODE_BUTTON) 
+    {
+      nextMode();
+    } 
+    else 
+    {
+      currentMode()->btnPressed(pin - FIRST_BUTTON + 1);
+    }
   }
 
   #ifdef SERIAL_PRINT
@@ -134,36 +218,4 @@ void intHandlerButton() {
   clearInterrupts();
   interrupts();
   activateInts();
-}
-
-void setup()
-{
-#ifdef SERIAL_PRINT
-  Serial.begin(9600);
-  Serial.println("Initializing ...");
-#endif 
-
-  //setup power on led
-  pinMode(CONN_LED_PIN, OUTPUT);
- 
-  setupGPIOExtender();
-
-  initWifi();
-  initializeMQTT();
-
-  while (mcp.getLastInterruptPinValue() != 255) {
-    delay(0);
-  }
- }
-
-void loop()
-{
-  reconnectMQTT();
-  //indicate readiness
-  digitalWrite(CONN_LED_PIN, HIGH);
-  client.loop();
-  //mcp.digitalRead(8);
-  //digitalWrite(CONN_LED_PIN, HIGH);
-  
-  rest(1000);
 }
