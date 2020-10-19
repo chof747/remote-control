@@ -42,6 +42,17 @@ uint8_t nextMode() {
     return gCurrentMode;
 }
 
+char* uppercase(char* s) 
+{
+    char* c = s;
+    while(0 != (int)*c)
+    {
+            *c = *c & ~(0x20);
+            ++c;
+    }
+
+    return s;
+}
 
 void mqttCallback(char *topic, byte *payload, uint8_t length)
 //******************************************************************************
@@ -52,10 +63,11 @@ void mqttCallback(char *topic, byte *payload, uint8_t length)
     memcpy(message, payload, length);
     message[length] = (char) 0;
 
-    char * token = strtok(topic, "/");
+    char * token = uppercase(strtok(topic, "/"));
     while( token != NULL) {
         strcpy(command,token);
         token = strtok(NULL,"/");
+        uppercase(command);
     }
 #ifdef SERIAL_PRINT
     Serial.print("Message arrived [");

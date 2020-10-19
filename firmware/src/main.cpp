@@ -182,7 +182,7 @@ void loop()
   currentMode()->execute();
   updateDisplay();
   
-  rest(10);
+  rest(LOOP_DELAY);
 }
 
 void intHandlerButton() 

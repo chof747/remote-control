@@ -119,7 +119,9 @@ bool SensorMonitor::handleButton(uint8_t btn)
 //*********************************************************************************
 {
 
-    Serial.printf("Button: %d, %d\n", btn);
+#ifdef SERIAL_PRINT
+    Serial.printf("Button: %d", btn);
+#endif
 
     if (btn == NEXT_SENSOR_BTN)
     {

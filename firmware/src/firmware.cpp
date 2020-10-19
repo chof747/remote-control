@@ -2,6 +2,9 @@
 #include "config.h"
 #include "mqtt.h"
 #include "Arduino.h"
+#include <ESP8266WiFi.h> 
+#include <ESP8266httpUpdate.h>
+
 
 #include <ESP8266WiFi.h>
 
@@ -14,12 +17,26 @@ FirmwareController::FirmwareController(Adafruit_SSD1306 *display, uint8_t mode) 
 
 void FirmwareController::onMessage(const char* topic, const char* command, const char* message) 
 {
-    //Serial.printf("Topic: %s, Command: %s, Message: %s\n", topic, command, message);
-    if ((strcmp(topic, "cmnd") == 0) && 
-        (strcmp(command, "status") == 0) && 
-        (strcmp(message, "5") == 0)) 
+    Serial.printf("Topic: %s, Command: %s, Message: %s\n", topic, command, message);
+    if ((0 == strcmp(topic, "CMND")) && 
+        (0 == strcmp(command, "STATUS")) && 
+        (0 == strcmp(message, "5")))
     {
         provideDeviceInfo();
+    } 
+    else if ((0 == strcmp(topic, "CMND")) && 
+        (0 == strcmp(command, "UPGRADE")))
+    {
+
+        if (0 == strncmp(message, "http://", 7))
+        {
+            performOTAUpdate(message);
+        }
+        else
+        {
+            sprintf(gMqttMessageBuffer, "Error: no Update URL given!");
+            mqttPublish(MQTT_STATS_TOPIC,"UPGRADE");
+        }
     }
 }
 
@@ -33,8 +50,15 @@ void FirmwareController::onActivation()
 }
 
 const char* FirmwareController::showLine1() 
+//*********************************************************************************
 {
     return "Firmware: ";
+}
+
+const char* FirmwareController::showLine2() 
+//*********************************************************************************
+{
+    return VERSION;
 }
 
 void FirmwareController::provideDeviceInfo() 
@@ -64,4 +88,28 @@ void FirmwareController::provideDeviceInfo()
     //Serial.println(gMqttMessageBuffer);
 
     mqttPublish(MQTT_STATS_TOPIC, "STATUS5");
+}
+
+void FirmwareController::performOTAUpdate(const char* url) 
+//*********************************************************************************
+{
+    t_httpUpdate_return ret =  ESPhttpUpdate.update(url, VERSION);
+    switch(ret) 
+    {
+        case HTTP_UPDATE_FAILED:
+            sprintf(gMqttMessageBuffer, "[update] Update failed from %s", url);
+            break;
+        case HTTP_UPDATE_NO_UPDATES:
+            sprintf(gMqttMessageBuffer, "[update] No Update from %s", VERSION);
+            break;
+        case HTTP_UPDATE_OK:
+            strcpy(gMqttMessageBuffer, "[update] Update ok."); // may not be called since we reboot the ESP
+            break;
+    }
+
+    #ifdef SERIAL_PRINT
+    Serial.println(gMqttMessageBuffer);
+    #endif
+
+    mqttPublish(MQTT_STATS_TOPIC, "UPGRADE");
 }

@@ -12,13 +12,14 @@ public:
 protected:
 
     const char* showLine1() override;
+    const char* showLine2() override;
     void onActivation() override;
     void onMessage(const char* topic, const char* command, const char* message) override; 
 
 private:
 
     void provideDeviceInfo();
-    void performOTAUpdate();
+    void performOTAUpdate(const char* url);
 };
 
 #endif //FIRMWARE_H
