@@ -54,6 +54,15 @@ char* uppercase(char* s)
     return s;
 }
 
+void loopModes()
+//******************************************************************************
+{
+   for(int i=0;i<NUM_MODES;++i) 
+   {
+        gModes[i]->onLoop();
+   } 
+}
+
 void mqttCallback(char *topic, byte *payload, uint8_t length)
 //******************************************************************************
 {

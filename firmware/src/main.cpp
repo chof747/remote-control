@@ -18,6 +18,7 @@ uint16_t gButtons[BUTTON_COUNT];
 //***********************************************************************************************
 //State Variables
 uint16_t millisSinceLastAction = 0;
+uint16_t loopcount = 0;
 
 
 #define activateInts() attachInterrupt(digitalPinToInterrupt(D5),intHandlerButton,FALLING)
@@ -146,6 +147,7 @@ void setup()
 
   //setup power on led
   pinMode(CONN_LED_PIN, OUTPUT);
+  pinMode(LOWP_LED_PIN, OUTPUT);
   pinMode(A0, INPUT);
  
   setupGPIOExtender();
@@ -178,10 +180,17 @@ void loop()
   //indicate readiness
   digitalWrite(CONN_LED_PIN, HIGH);
 
+
   client.loop();
+  if (0 == loopcount % MODE_LOOP_CYCLES)
+  {
+    loopModes();
+  }
+
   currentMode()->execute();
   updateDisplay();
   
+  ++loopcount;
   rest(LOOP_DELAY);
 }
 

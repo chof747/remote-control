@@ -32,6 +32,10 @@ void FirmwareController::onMessage(const char* topic, const char* command, const
         {
             performOTAUpdate(message);
         }
+        else if (0 == strncmp(message, "1", 1))
+        {
+            performOTAUpdate(DEFAULT_OTA_URL);
+        }
         else
         {
             sprintf(gMqttMessageBuffer, "Error: no Update URL given!");
@@ -100,7 +104,7 @@ void FirmwareController::performOTAUpdate(const char* url)
             sprintf(gMqttMessageBuffer, "[update] Update failed from %s", url);
             break;
         case HTTP_UPDATE_NO_UPDATES:
-            sprintf(gMqttMessageBuffer, "[update] No Update from %s", VERSION);
+            sprintf(gMqttMessageBuffer, "[update] No Update for version %s", VERSION);
             break;
         case HTTP_UPDATE_OK:
             strcpy(gMqttMessageBuffer, "[update] Update ok."); // may not be called since we reboot the ESP
