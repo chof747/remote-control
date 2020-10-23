@@ -1,2 +1,3 @@
 firmware/include/config.h
 hardware/Gerber_PCB_2020-08-14_18-20-35_2020-08-16_22-48-04.zip
+firmware/test/ota-headers.json

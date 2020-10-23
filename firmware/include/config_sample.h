@@ -17,6 +17,9 @@
 #define MQTT_USER                             DEVICE_NAME
 #define MQTT_PASSWORD                         "YOUR_DEVICE_PASSWORD"
 
+//OTA Parameters
+#define DEFAULT_OTA_URL                       "YOUR_OTA_URL"
+
 //***********************************************************************************************
 //Button Setup
 #if (ENVIRONMENT == 0)

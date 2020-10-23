@@ -32,6 +32,10 @@ void FirmwareController::onMessage(const char* topic, const char* command, const
         {
             performOTAUpdate(message);
         }
+        else if (0 == strncmp(message, "1", 1))
+        {
+            performOTAUpdate(DEFAULT_OTA_URL);
+        }
         else
         {
             sprintf(gMqttMessageBuffer, "Error: no Update URL given!");
