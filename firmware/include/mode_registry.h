@@ -12,5 +12,7 @@ ModeController* currentMode();
 uint8_t nextMode();
 void mqttCallback(char *topic, byte *payload, uint8_t length);
 
+void loopModes();
+
 
 #endif //MODE_REGISTRY_H

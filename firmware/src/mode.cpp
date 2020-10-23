@@ -98,6 +98,10 @@ bool ModeController::onExecution() {
     return false;
 }
 
+void ModeController::onLoop() {
+    
+}
+
 void ModeController::onMessage(const char* topic, const char* command, const char* message) {
 
 }
