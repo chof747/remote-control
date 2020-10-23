@@ -68,6 +68,17 @@ void BatteryControl::onActivation()
     updateDisplay = true; 
 }
 
+void BatteryControl::onLoop()
+//*********************************************************************************
+{
+    readVoltage();
+
+    if (WARNING_LEVEL >= voltage)
+    {
+        digitalWrite(LOWP_LED_PIN, HIGH);
+    }
+}
+
 void BatteryControl::readVoltage() 
 //*********************************************************************************
 {

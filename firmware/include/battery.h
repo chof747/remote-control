@@ -9,6 +9,7 @@ public:
 
     BatteryControl(Adafruit_SSD1306 *display, uint8_t mode);
     ~BatteryControl();
+    void onLoop() override;
 
 protected:
 
