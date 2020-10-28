@@ -194,7 +194,7 @@ const char *SensorMonitor::showLine1()
 {
     if (currentSensorName == NULL)
     {
-        return "1 naechste";
+        return "Sensoren";
     }
     else
     {
@@ -207,7 +207,7 @@ const char *SensorMonitor::showLine2()
 {
     if (currentSensorName == NULL)
     {
-        return "2 Remote";
+        return "1 - scroll";
     }
     else
     {
