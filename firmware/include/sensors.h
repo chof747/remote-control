@@ -38,6 +38,7 @@ private:
 
     sensor_description_main_t sensorMain;
     sensor_t* sensors;
+    int nSensors;
     char** values;
 
   
