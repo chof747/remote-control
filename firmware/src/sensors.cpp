@@ -27,6 +27,7 @@ SensorMonitor::SensorMonitor(Adafruit_SSD1306 *display, uint8_t mode) :
     enableDisplay(true);
 
     sensors = NULL;
+    nSensors = 0;
 
     currentSensorName = NULL;
     currentSensorReading = NULL;
@@ -36,11 +37,12 @@ SensorMonitor::SensorMonitor(Adafruit_SSD1306 *display, uint8_t mode) :
 }
 
 void SensorMonitor::clearSensors()
+//*********************************************************************************
 {
     if (sensors != NULL) 
     {
         delete sensors;
-        for(int i=0;i<sizeof(values); ++i) 
+        for(int i=0;i<nSensors; ++i) 
         {
             delete values[i];
         }
@@ -53,7 +55,10 @@ void SensorMonitor::createSensors(int count)
 {
     sensors = new sensor_t[count];
     values  = new char*[count];
-    for(int i=0; i<count;++i) 
+
+    nSensors = count;
+    Serial.printf("Count Sensors: %d\n", nSensors);
+    for(int i=0; i<nSensors;++i) 
     {
         values[i] = new char[12];
     }
@@ -79,6 +84,12 @@ void SensorMonitor::obtainSensors()
     rtrim(sensorMain.prefix, 15);
     int count = atoi(sensorMain.number);
 
+    #ifdef SERIAL_PRINT
+        Serial.printf("Number of Sensors: %d\n", count);
+    #endif
+
+
+
     createSensors(count);
 
     payload_ptr += sizeof(sensorMain);
@@ -91,10 +102,14 @@ void SensorMonitor::obtainSensors()
         rtrim(sensors[i].name, 8);
         rtrim(sensors[i].path, 24);
     
+    #ifdef SERIAL_PRINT
+        Serial.printf("Sensor %d: %s from %s\n", i, sensors[i].name, sensors[i].path);
+    #endif
+
         payload_ptr += s;
     }
 
-    currentSensor = count - 1 ;
+    currentSensor = count - 1;
 }
 
 char *SensorMonitor::readSensor()
@@ -125,11 +140,8 @@ bool SensorMonitor::handleButton(uint8_t btn)
 
     if (btn == NEXT_SENSOR_BTN)
     {
-#ifdef SERIAL_PRINT
-        Serial.print("Switching to next sensor reading!");
-#endif
 
-        if (currentSensor < sizeof(sensors))
+        if (currentSensor < (nSensors - 1))
         {
             ++currentSensor;
         }
@@ -138,6 +150,9 @@ bool SensorMonitor::handleButton(uint8_t btn)
             currentSensor = 0;
         }
         
+#ifdef SERIAL_PRINT
+        Serial.printf("Switching to next sensor reading %d of %d!\n", currentSensor, nSensors);
+#endif
 
         needExecution();
     }
@@ -150,7 +165,7 @@ bool SensorMonitor::onExecution()
 {
 
 #ifdef SERIAL_PRINT
-    Serial.printf("Reading  Sensor: %s", sensors[currentSensor].name);
+    Serial.printf("Reading  Sensor: %s\n", sensors[currentSensor].name);
 #endif
 
     currentSensorName = sensors[currentSensor].name;
@@ -179,7 +194,7 @@ const char *SensorMonitor::showLine1()
 {
     if (currentSensorName == NULL)
     {
-        return "1 naechste";
+        return "Sensoren";
     }
     else
     {
@@ -192,7 +207,7 @@ const char *SensorMonitor::showLine2()
 {
     if (currentSensorName == NULL)
     {
-        return "2 Remote";
+        return "1 - scroll";
     }
     else
     {
