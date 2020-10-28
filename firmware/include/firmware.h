@@ -21,6 +21,7 @@ private:
 
     void setLines();
     void provideDeviceInfo();
+    void askForUpdate();
     void performOTAUpdate(const char* url);
 
     uint8_t mode;

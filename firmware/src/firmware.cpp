@@ -10,6 +10,7 @@
 
 #define NEXT_INFO_BTN 1
 #define SEND_STATUS_BTN 2
+#define ASK_UPDATE_BTN 10
 
 FirmwareController::FirmwareController(Adafruit_SSD1306 *display, uint8_t mode) : 
     ModeController::ModeController(display, mode) 
@@ -51,6 +52,10 @@ void FirmwareController::onMessage(const char* topic, const char* command, const
         {
             sprintf(gMqttMessageBuffer, "Error: no Update URL given!");
             mqttPublish(MQTT_STATS_TOPIC,"UPGRADE");
+
+            #ifdef SERIAL_PRINT
+            Serial.println(gMqttMessageBuffer);
+            #endif
         }
     }
 }
@@ -93,6 +98,10 @@ bool FirmwareController::handleButton(uint8_t btn)
     {
         provideDeviceInfo();
     }
+    else if (ASK_UPDATE_BTN == btn)
+    {
+        askForUpdate();
+    }
 
     return true;
 }
@@ -121,6 +130,13 @@ void FirmwareController::setLines()
             strncpy(value,DEVICE_NAME, 19);
             break;
     }
+}
+
+void FirmwareController::askForUpdate()
+//*********************************************************************************
+{
+    strcpy(gMqttMessageBuffer, "");
+    mqttPublish(MQTT_STATS_TOPIC, "UPDATE_READY");
 }
 
 
