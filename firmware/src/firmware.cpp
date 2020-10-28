@@ -8,14 +8,25 @@
 
 #include <ESP8266WiFi.h>
 
+#define NEXT_INFO_BTN 1
+#define SEND_STATUS_BTN 2
+
 FirmwareController::FirmwareController(Adafruit_SSD1306 *display, uint8_t mode) : 
-    ModeController::ModeController(display, mode) {
+    ModeController::ModeController(display, mode) 
+//*********************************************************************************
+{
 
         enableDisplay(true);
+
+        mode = 0;
+        strcpy(caption,"");
+        strcpy(value,"");
+        setLines();
 
 }
 
 void FirmwareController::onMessage(const char* topic, const char* command, const char* message) 
+//*********************************************************************************
 {
     Serial.printf("Topic: %s, Command: %s, Message: %s\n", topic, command, message);
     if ((0 == strcmp(topic, "CMND")) && 
@@ -56,14 +67,62 @@ void FirmwareController::onActivation()
 const char* FirmwareController::showLine1() 
 //*********************************************************************************
 {
-    return "Firmware: ";
+    return caption;
 }
 
 const char* FirmwareController::showLine2() 
 //*********************************************************************************
 {
-    return VERSION;
+    return value;
 }
+
+bool FirmwareController::handleButton(uint8_t btn) 
+//*********************************************************************************
+{
+    if (NEXT_INFO_BTN == btn)
+    {
+        ++mode;
+        if(3 < mode)
+        {
+            mode = 0;
+        }
+
+        setLines();
+    }
+    else if (SEND_STATUS_BTN == btn) 
+    {
+        provideDeviceInfo();
+    }
+
+    return true;
+}
+
+void FirmwareController::setLines()
+//*********************************************************************************
+{
+    switch(mode) 
+    {
+        case 0:
+            strcpy(caption, "Firmware:");
+            strncpy(value, VERSION,19) ;
+            break;
+
+        case 1:
+            strcpy(caption, "IP Address:");
+            strncpy(value, WiFi.localIP().toString().c_str(),19);
+            break;
+
+        case 2:
+            strcpy(caption, "MAC Addr.:");
+            strncpy(value,WiFi.macAddress().c_str(), 19);
+            break;
+        case 3:
+            strcpy(caption, "Name:");
+            strncpy(value,DEVICE_NAME, 19);
+            break;
+    }
+}
+
 
 void FirmwareController::provideDeviceInfo() 
 //*********************************************************************************

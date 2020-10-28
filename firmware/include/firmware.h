@@ -15,11 +15,17 @@ protected:
     const char* showLine2() override;
     void onActivation() override;
     void onMessage(const char* topic, const char* command, const char* message) override; 
+    bool handleButton(uint8_t btn) override;
 
 private:
 
+    void setLines();
     void provideDeviceInfo();
     void performOTAUpdate(const char* url);
+
+    uint8_t mode;
+    char caption[12];
+    char value[20];
 };
 
 #endif //FIRMWARE_H
