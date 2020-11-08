@@ -5,7 +5,6 @@
 #include "Adafruit_MCP23017.h"
 #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1306.h"
-#include "wifi.h"
 #include "mqtt.h"
 #include "config.h"
 
