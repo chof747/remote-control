@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
+#include <WiFiManager.h> 
  
 #include "Adafruit_MCP23017.h"
 #include "Adafruit_GFX.h"
@@ -117,7 +118,23 @@ void setupGPIOExtender()
 void setupNetwork() 
 //*********************************************************************************
 {
-  initWifi();
+  WiFiManager wifiManager;
+
+  #ifdef SERIAL_PRINT
+  wifiManager.setDebugOutput(true);
+  #else
+  wifiManager.setDebugOutput(false);
+  #endif
+
+  if(!wifiManager.autoConnect()) {
+    #ifdef SERIAL_PRINT
+    Serial.println("failed to connect and hit timeout");
+    #endif
+    //reset and try again, or maybe put it to deep sleep
+    ESP.reset();
+    delay(1000);
+  } 
+
   initializeMQTT(mqttCallback);
   if (!reconnectMQTT())
   {
