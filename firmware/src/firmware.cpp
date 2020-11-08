@@ -20,6 +20,8 @@ FirmwareController::FirmwareController(Adafruit_SSD1306 *display, uint8_t mode) 
         enableDisplay(true);
 
         mode = 0;
+        triggerUpload = false;
+
         strcpy(caption,"");
         strcpy(value,"");
         setLines();
@@ -87,7 +89,7 @@ bool FirmwareController::handleButton(uint8_t btn)
     if (NEXT_INFO_BTN == btn)
     {
         ++mode;
-        if(3 < mode)
+        if(4 < mode)
         {
             mode = 0;
         }
@@ -100,7 +102,8 @@ bool FirmwareController::handleButton(uint8_t btn)
     }
     else if (ASK_UPDATE_BTN == btn)
     {
-        askForUpdate();
+        triggerUpload = true;
+        needExecution();
     }
 
     return true;
@@ -126,17 +129,26 @@ void FirmwareController::setLines()
             strncpy(value,WiFi.macAddress().c_str(), 19);
             break;
         case 3:
+            strcpy(caption, "WLAN:");
+            strncpy(value,WiFi.SSID().c_str(), 19);
+            break;
+        case 4:
             strcpy(caption, "Name:");
             strncpy(value,DEVICE_NAME, 19);
             break;
     }
 }
 
-void FirmwareController::askForUpdate()
+bool FirmwareController::onExecution()
 //*********************************************************************************
 {
-    strcpy(gMqttMessageBuffer, "");
-    mqttPublish(MQTT_STATS_TOPIC, "UPDATE_READY");
+    if (triggerUpload)
+    {
+        performOTAUpdate(DEFAULT_OTA_URL);
+        triggerUpload = false;
+    }
+
+    return false;
 }
 
 
@@ -172,6 +184,9 @@ void FirmwareController::provideDeviceInfo()
 void FirmwareController::performOTAUpdate(const char* url) 
 //*********************************************************************************
 {
+    #ifdef SERIAL_PRINT
+    Serial.printf("Updating from %s\n", url);
+    #endif
     t_httpUpdate_return ret =  ESPhttpUpdate.update(url, VERSION);
     switch(ret) 
     {

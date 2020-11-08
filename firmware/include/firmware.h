@@ -21,12 +21,13 @@ private:
 
     void setLines();
     void provideDeviceInfo();
-    void askForUpdate();
+    bool onExecution() override;
     void performOTAUpdate(const char* url);
 
     uint8_t mode;
     char caption[12];
     char value[20];
+    bool triggerUpload;
 };
 
 #endif //FIRMWARE_H
