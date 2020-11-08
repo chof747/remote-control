@@ -2,7 +2,6 @@
 #include "config.h"
 
 #include <ESP8266WiFi.h> // ESP8266 WiFi driver
-#include "wifi.h"
 
 char topicstr[100];
 char gMqttMessageBuffer[255];
