@@ -6,8 +6,6 @@
 #include <ESP8266httpUpdate.h>
 
 
-#include <ESP8266WiFi.h>
-
 #define NEXT_INFO_BTN 1
 #define SEND_STATUS_BTN 2
 #define ASK_UPDATE_BTN 10
