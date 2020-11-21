@@ -41,7 +41,7 @@ bool reconnectMQTT()
         sprintf(mqtt_client_id, "esp8266-%x", ESP.getChipId());
         int counter = 0;
 
-        while ((!client.connected()) && (counter < 5))
+        while ((!client.connected()) && (counter < 3))
         {
             #ifdef SERIAL_PRINT
               Serial.printf("Attempting MQTT connection to %s as %s ... ", MQTT_SERVER, MQTT_USER);

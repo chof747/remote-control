@@ -41,6 +41,7 @@
 #define CONN_LED_PIN     D6
 #define LOWP_LED_PIN     D7
 #define PRESS_MSG_TIME 1000
+#define ERR_MSG_TIME   2000
 
 
 #if (ENVIRONMENT == 0)
