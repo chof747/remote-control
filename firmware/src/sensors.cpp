@@ -7,6 +7,8 @@
 #define NEXT_SENSOR_BTN 1
 #define REMOTE_MODE_BTN 2
 
+bool inInit = false;
+
 void rtrim(char* s, int length) 
 //*********************************************************************************
 {
@@ -187,13 +189,18 @@ void SensorMonitor::onActivation()
     currentSensorReading = NULL;
     currentSensorName = NULL;
     sensorSwitch = false;
+
+    inInit = true;
+
+    needExecution();
 }
 
 const char *SensorMonitor::showLine1()
 //*********************************************************************************
 {
-    if (currentSensorName == NULL)
+    if ((currentSensorName == NULL) || (inInit)) 
     {
+        inInit = false;
         return "Sensoren";
     }
     else
@@ -205,8 +212,9 @@ const char *SensorMonitor::showLine1()
 const char *SensorMonitor::showLine2()
 //*********************************************************************************
 {
-    if (currentSensorName == NULL)
+    if ((currentSensorName == NULL) || (inInit)) 
     {
+        inInit = false;
         return "1 - scroll";
     }
     else

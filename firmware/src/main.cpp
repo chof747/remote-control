@@ -229,9 +229,9 @@ void loop()
     loopModes();
   }
 
-  currentMode()->execute();
   updateDisplay();
-
+  currentMode()->execute();
+  
   ++loopcount;
   rest(LOOP_DELAY);
 }

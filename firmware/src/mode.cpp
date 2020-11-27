@@ -56,7 +56,7 @@ bool ModeController::display() {
         attachedDisplay->print(l2);
 
         //addGraphics(attachedDisplay);
-        //Serial.println("Added Art");
+        Serial.println("Update Display");
 
         attachedDisplay->display();
 
