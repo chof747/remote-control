@@ -18,7 +18,12 @@
 #define MQTT_PASSWORD                         "YOUR_DEVICE_PASSWORD"
 
 //OTA Parameters
-#define DEFAULT_OTA_URL                       "YOUR_OTA_URL"
+#if (ENVIRONMENT == 0)
+  #define DEFAULT_OTA_URL                       "YOUR_OTA_URL"
+#elif 
+  #define DEFAULT_OTA_URL                       "YOUR_OTA_URL"
+#endif
+
 
 //***********************************************************************************************
 //Button Setup
@@ -38,10 +43,17 @@
 
 //***********************************************************************************************
 //Controller Setup
-#define CONN_LED_PIN     D6
-#define LOWP_LED_PIN     D7
-#define PRESS_MSG_TIME 1000
-#define ERR_MSG_TIME   2000
+#if (ENVIRONMENT == 0)
+  #define CONN_LED_PIN     D7
+  #define LOWP_LED_PIN     D6
+  #define PRESS_MSG_TIME 1000
+  #define ERR_MSG_TIME   2000
+#elif (ENVIRONMENT == 1)
+  #define CONN_LED_PIN     D6
+  #define LOWP_LED_PIN     D7
+  #define PRESS_MSG_TIME 1000
+  #define ERR_MSG_TIME   2000
+#endif
 
 
 #if (ENVIRONMENT == 0)
@@ -65,12 +77,16 @@
 
 //***********************************************************************************************
 //Mode Remote
-#define REMOTE_ACTIVE_MESSAGE  "Ready..."
+#define REMOTE_ACTIVE_MESSAGE  "Bereit..."
 
 //***********************************************************************************************
 //Mode Sensors
-#define SENSOR_LIST_URL        "YOUR_URL_TO_SENSOR_LIST"
-#define SENSOR_URL_BASE        "YOUR_URL_BASE_FOR_SENSOR_READING"
+#if (ENVIRONMENT == 0)
+  #define SENSOR_URL        "YOUR_SENSOR_URL"
+#elif (ENVIRONMENT == 1)
+  #define SENSOR_URL        "YOUR_SENSOR_URL"
+#endif 
+
 
 //***********************************************************************************************
 //Mode Battery
