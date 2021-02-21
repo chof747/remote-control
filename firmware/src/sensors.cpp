@@ -23,111 +23,37 @@ SensorMonitor::SensorMonitor(Adafruit_SSD1306 *display, uint8_t mode) :
     ModeController::ModeController(display, mode)
 //*********************************************************************************
 {
-
     enableDisplay(true);
-
-    sensors = NULL;
-    nSensors = 0;
-
-    currentSensorName = NULL;
-    currentSensorReading = NULL;
-    currentSensor = 0;
-
     sensorSwitch = false;
+    strcpy(lines[0], "Sensoren");
+    strcpy(lines[1], "1 - nächster");
 }
 
-void SensorMonitor::clearSensors()
-//*********************************************************************************
-{
-    if (sensors != NULL) 
-    {
-        delete sensors;
-        for(int i=0;i<nSensors; ++i) 
-        {
-            delete values[i];
-        }
-        delete values;
-    }
-}
 
-void SensorMonitor::createSensors(int count) 
-//*********************************************************************************
-{
-    sensors = new sensor_t[count];
-    values  = new char*[count];
-
-    nSensors = count;
-    Serial.printf("Count Sensors: %d\n", nSensors);
-    for(int i=0; i<nSensors;++i) 
-    {
-        values[i] = new char[12];
-    }
-}
-
-void SensorMonitor::obtainSensors()
-//*********************************************************************************
-{
-    clearSensors();
-
-    #ifdef SERIAL_PRINT
-        Serial.println("Getting Sensor List ...");
-    #endif
-
-    HTTPClient client;
-    client.begin(SENSOR_LIST_URL);
-    int httpCode = client.GET(); //Send the request
-
-    String payload = client.getString();
-    const char* payload_ptr = payload.c_str();
-
-    memcpy(&sensorMain, payload_ptr, sizeof(sensorMain));
-    rtrim(sensorMain.prefix, 15);
-    int count = atoi(sensorMain.number);
-
-    #ifdef SERIAL_PRINT
-        Serial.printf("Number of Sensors: %d\n", count);
-    #endif
-
-
-
-    createSensors(count);
-
-    payload_ptr += sizeof(sensorMain);
-
-    size_t s = sizeof(sensor_t);
-
-    for(int i=0; i<count; ++i) 
-    {
-        memcpy(&sensors[i], payload_ptr, s);
-        rtrim(sensors[i].name, 8);
-        rtrim(sensors[i].path, 24);
-    
-    #ifdef SERIAL_PRINT
-        Serial.printf("Sensor %d: %s from %s\n", i, sensors[i].name, sensors[i].path);
-    #endif
-
-        payload_ptr += s;
-    }
-
-    currentSensor = count - 1;
-}
-
-char *SensorMonitor::readSensor()
+void SensorMonitor::readSensor()
 //*********************************************************************************
 {
     HTTPClient client;
-    char url[100];
-    sprintf(url, "%s%s/%s", SENSOR_URL_BASE, sensorMain.prefix, sensors[currentSensor].path);
-
-    client.begin(url);
+    client.begin(SENSOR_URL);
     int httpCode = client.GET();
     Serial.printf("HTTP-Return Code: %d", httpCode);
     if (httpCode == 200)
     {
-        strcpy(values[currentSensor], client.getString().c_str());
-    }
+        char buf[161];
+        strncpy(buf,client.getString().c_str(), 161);
 
-    return values[currentSensor];
+        char* p = buf;
+
+        int i=0;
+        char* str = strtok(p, "\n");
+        while((str != NULL) && (i<2))
+        {
+            strcpy(lines[i], str);
+            i++;
+            str = strtok(NULL, "\n");
+        }
+
+    }
 }
 
 bool SensorMonitor::handleButton(uint8_t btn)
@@ -140,21 +66,7 @@ bool SensorMonitor::handleButton(uint8_t btn)
 
     if (btn == NEXT_SENSOR_BTN)
     {
-
-        if (currentSensor < (nSensors - 1))
-        {
-            ++currentSensor;
-        }
-        else
-        {
-            currentSensor = 0;
-        }
-        
-#ifdef SERIAL_PRINT
-        Serial.printf("Switching to next sensor reading %d of %d!\n", currentSensor, nSensors);
-#endif
-
-        needExecution();
+       needExecution();
     }
 
     return true;
@@ -164,12 +76,12 @@ bool SensorMonitor::onExecution()
 //*********************************************************************************
 {
 
-#ifdef SERIAL_PRINT
-    Serial.printf("Reading  Sensor: %s\n", sensors[currentSensor].name);
-#endif
 
-    currentSensorName = sensors[currentSensor].name;
-    currentSensorReading = readSensor();
+    readSensor();
+
+#ifdef SERIAL_PRINT
+    Serial.printf("Reading  Sensor: %s, value: %s", lines[0], lines[1]);
+#endif
 
     return false;
 }
@@ -181,36 +93,18 @@ void SensorMonitor::onActivation()
     Serial.println("Activating Sensor Reading Mode ...");
 #endif
 
-    obtainSensors();
-
     updateDisplay = true;
-    currentSensorReading = NULL;
-    currentSensorName = NULL;
     sensorSwitch = false;
 }
 
 const char *SensorMonitor::showLine1()
 //*********************************************************************************
 {
-    if (currentSensorName == NULL)
-    {
-        return "Sensoren";
-    }
-    else
-    {
-        return currentSensorName;
-    }
+    return lines[0];
 }
 
 const char *SensorMonitor::showLine2()
 //*********************************************************************************
 {
-    if (currentSensorName == NULL)
-    {
-        return "1 - scroll";
-    }
-    else
-    {
-        return currentSensorReading;
-    }
+    return lines[1];
 }
