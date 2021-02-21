@@ -24,6 +24,8 @@ protected:
 
     virtual const char* showLine1();
     virtual const char* showLine2();
+    virtual const char* showLine3();
+    virtual const char* showLine4();
     virtual bool addGraphics(Adafruit_SSD1306 *display);
     
     virtual bool handleButton(uint8_t btn);

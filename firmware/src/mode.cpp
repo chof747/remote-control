@@ -49,11 +49,17 @@ bool ModeController::display() {
 
         const char* l1 = showLine1();
         const char* l2 = showLine2();
+        const char* l3 = showLine3();
+        const char* l4 = showLine4();
 
         attachedDisplay->setCursor(0,0);
         attachedDisplay->print(l1);
-        attachedDisplay->setCursor(0,17);
+        attachedDisplay->setCursor(0,8);
         attachedDisplay->print(l2);
+        attachedDisplay->setCursor(0,16);
+        attachedDisplay->print(l3);
+        attachedDisplay->setCursor(0,24);
+        attachedDisplay->print(l4);
 
         //addGraphics(attachedDisplay);
         //Serial.println("Added Art");
@@ -83,6 +89,14 @@ const char* ModeController::showLine1() {
 }
 
 const char* ModeController::showLine2() {
+    return "";
+}
+
+const char* ModeController::showLine3() {
+    return "";
+}
+
+const char* ModeController::showLine4() {
     return "";
 }
 

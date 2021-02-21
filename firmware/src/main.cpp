@@ -170,7 +170,7 @@ void setupDisplay()
 {
   display.begin();
   display.clearDisplay();
-  display.setTextSize(2);
+  display.setTextSize(1);
   display.setTextWrap(false);
   display.setTextColor(SSD1306_WHITE);
   display.display();

@@ -26,7 +26,8 @@ SensorMonitor::SensorMonitor(Adafruit_SSD1306 *display, uint8_t mode) :
     enableDisplay(true);
     sensorSwitch = false;
     strcpy(lines[0], "Sensoren");
-    strcpy(lines[1], "1 - nächster");
+    strcpy(lines[1], "1 - naechster");
+    strcpy(lines[2], "");
 }
 
 
@@ -46,7 +47,7 @@ void SensorMonitor::readSensor()
 
         int i=0;
         char* str = strtok(p, "\n");
-        while((str != NULL) && (i<2))
+        while((str != NULL) && (i<3))
         {
             strcpy(lines[i], str);
             i++;
@@ -80,7 +81,7 @@ bool SensorMonitor::onExecution()
     readSensor();
 
 #ifdef SERIAL_PRINT
-    Serial.printf("Reading  Sensor: %s, value: %s", lines[0], lines[1]);
+    Serial.printf("Reading  Sensor: %s, value: %s\n", lines[0], lines[1]);
 #endif
 
     return false;
@@ -107,4 +108,10 @@ const char *SensorMonitor::showLine2()
 //*********************************************************************************
 {
     return lines[1];
+}
+
+const char *SensorMonitor::showLine3()
+//*********************************************************************************
+{
+    return lines[2];
 }

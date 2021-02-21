@@ -17,13 +17,14 @@ protected:
 
     const char* showLine1() override;
     const char* showLine2() override;
+    const char* showLine3() override;
 
 private:
 
     bool sensorSwitch;
 
     int nSensors;
-    char lines[2][80];
+    char lines[3][80];
 
     void readSensor();
 
