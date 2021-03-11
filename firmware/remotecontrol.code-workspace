@@ -5,6 +5,30 @@
         },
         {
             "path": "../../../../PlatformIO/Projects/OTA Firmware test"
+        },
+        {
+            "name": "remote-diagnostic",
+            "path": "../diagnose/remote-diagnostic"
         }
-    ]
+    ],
+    "settings": {
+        "sqltools.connections": [
+            {
+                "mysqlOptions": {
+                    "authProtocol": "default"
+                },
+                "previewLimit": 500,
+                "server": "honk",
+                "port": 3306,
+                "driver": "MySQL",
+                "name": "Home Sensors",
+                "database": "homeSensors",
+                "username": "chof",
+                "password": "luhu4me"
+            }
+        ],
+        "files.associations": {
+            "*.tcc": "cpp"
+        }
+    }
 }
