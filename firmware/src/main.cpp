@@ -32,7 +32,6 @@ void ICACHE_RAM_ATTR intHandlerButton();
 void rest(uint16_t activeDelay)
 //*********************************************************************************
 {
-
   millisSinceLastAction += activeDelay;
 
   if (millisSinceLastAction >= DEEP_SLEEP_AFTER)
@@ -98,7 +97,7 @@ void setupGPIOExtender()
     mcp.pinMode(b, INPUT);
     mcp.pullUp(b, HIGH);
     mcp.setupInterruptPin(b, FALLING);
-    //while (mcp.digitalRead(b) != HIGH);
+    while (mcp.digitalRead(b) != HIGH);
     gButtonMask += 1 << b;
   }
 
@@ -197,12 +196,17 @@ void setup()
 
   //clear the interrupt
 
-#ifndef NO_INTERRUPTS
-  while (mcp.getLastInterruptPinValue() != 255)
-  {
-    delay(0);
-  }
-#endif
+  #ifndef NO_INTERRUPTS
+   int x;
+    while ((x = mcp.getLastInterruptPinValue()) != 255)
+    {
+      #ifdef SERIAL_PRINT
+        uint8_t pin = mcp.getLastInterruptPin() ;
+        Serial.printf("interrupt: pin: %d - value %d\n", pin, x);
+      #endif
+      delay(0);
+    }
+  #endif
 
   setupNetwork();
 
@@ -265,7 +269,10 @@ void intHandlerButton()
   Serial.printf("Button %d pressed (value = %d)\n", pin, val);
 #endif
 
-  clearInterrupts();
+  while(!mcp.digitalRead(pin));
+  int gpio_status = GPIO_REG_READ(GPIO_STATUS_ADDRESS);
+  GPIO_REG_WRITE(GPIO_STATUS_W1TC_ADDRESS, gpio_status);
+
   interrupts();
   activateInts();
 }

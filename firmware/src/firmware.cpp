@@ -10,6 +10,9 @@
 #define SEND_STATUS_BTN 2
 #define ASK_UPDATE_BTN 10
 
+#define GETVERSIONSTRING(d,v) d "#" v
+
+
 FirmwareController::FirmwareController(Adafruit_SSD1306 *display, uint8_t mode) : 
     ModeController::ModeController(display, mode) 
 //*********************************************************************************
@@ -185,7 +188,7 @@ void FirmwareController::performOTAUpdate(const char* url)
     #ifdef SERIAL_PRINT
     Serial.printf("Updating from %s\n", url);
     #endif
-    t_httpUpdate_return ret =  ESPhttpUpdate.update(url, VERSION);
+    t_httpUpdate_return ret =  ESPhttpUpdate.update(url, GETVERSIONSTRING(DEVICE_NAME, VERSION));
     switch(ret) 
     {
         case HTTP_UPDATE_FAILED:

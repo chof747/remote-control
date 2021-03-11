@@ -20,7 +20,7 @@
 //OTA Parameters
 #if (ENVIRONMENT == 0)
   #define DEFAULT_OTA_URL                       "YOUR_OTA_URL"
-#elif 
+#elif (ENVIRONMENT == 1)
   #define DEFAULT_OTA_URL                       "YOUR_OTA_URL"
 #endif
 
