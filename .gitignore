@@ -4,3 +4,4 @@ firmware/test/ota-headers.json
 firmware/remotecontrol.code-workspace
 diagnose/remote-diagnostic/.gitignore
 firmware/ota/prod_config.py
+firmware/ota/dev_config.py

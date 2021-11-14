@@ -1,11 +1,14 @@
 #include <Arduino.h>
 #include <ESP8266HTTPClient.h>
+#include <ESP8266WiFi.h>
 
 #include "sensors.h"
 #include "config.h"
 
 #define NEXT_SENSOR_BTN 1
 #define REMOTE_MODE_BTN 2
+
+WiFiClient esp_client;
 
 void rtrim(char* s, int length) 
 //*********************************************************************************
@@ -35,7 +38,7 @@ void SensorMonitor::readSensor()
 //*********************************************************************************
 {
     HTTPClient client;
-    client.begin(SENSOR_URL);
+    client.begin(esp_client, SENSOR_URL);
     int httpCode = client.GET();
     Serial.printf("HTTP-Return Code: %d", httpCode);
     if (httpCode == 200)
