@@ -19,6 +19,7 @@ class ButtonControls: public Component
     void loop();
 
     void setController(ButtonController* controller);
+    void activateWakeUp();
 
   private:
   

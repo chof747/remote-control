@@ -19,6 +19,9 @@ class Display: public Component
         uint8_t getMaxLines();
         void clear();
 
+        void turnOff();
+        void turnOn();
+
     private:
         bool changed;
         GFXfont fontData;

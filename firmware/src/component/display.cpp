@@ -57,6 +57,18 @@ void Display::clear()
     changed = true;
 }
 
+void Display::turnOff()
+//****************************************************************************************
+{
+    device.ssd1306_command(SSD1306_DISPLAYOFF);
+}
+
+void Display::turnOn()
+//****************************************************************************************
+{
+    device.ssd1306_command(SSD1306_DISPLAYON);
+}
+
 bool Display::printto(uint8_t line, const char *text, ...)
 //****************************************************************************************
 {

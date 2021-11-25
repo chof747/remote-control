@@ -19,6 +19,8 @@ class RemoteController: public ControllerBase, ButtonController, TimeOutControll
     private:
 
     ControllerBase* timeoutTarget;
+
+    int getButton(btnStateType state);
 };
 
 #endif //MESSAGE_CONTROLLER_H

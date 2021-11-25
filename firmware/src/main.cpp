@@ -49,6 +49,8 @@ void setup()
     components[i]->afterSetup();
   }
 
+  mqttClient.stat(MQTT_ACTIVATION_MSG, "active", true);
+
   activeController = &remote;
   activeController->activate();
 }

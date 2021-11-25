@@ -117,6 +117,13 @@ void ButtonControls::setController(ButtonController* controller)
   this->controller = controller;
 }
 
+void ButtonControls::activateWakeUp()
+//*********************************************************************************
+{
+  mcp.digitalWrite(WAKE_UP_WATCH_PIN, HIGH);
+}
+
+
 uint16_t ButtonControls::readButtons()
 //*********************************************************************************
 {
