@@ -8,7 +8,7 @@
 class Display: public Component
 {
     public:        
-        void setup();
+        bool setup();
         void loop();
         
         bool printto(uint8_t line, const char* text, ...);

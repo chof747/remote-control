@@ -7,7 +7,7 @@ class WifiManager: public Component
 {
 
 public:
-    void setup();
+    bool setup();
     void loop();
 
 };

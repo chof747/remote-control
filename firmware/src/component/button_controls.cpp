@@ -12,7 +12,7 @@
 
 Adafruit_MCP23X17 mcp;
 
-void ButtonControls::setup()
+bool ButtonControls::setup()
 //*********************************************************************************
 {
   controller = NULL;
@@ -29,6 +29,8 @@ void ButtonControls::setup()
   eventState = 0;
   eventTime = 0;
   clicks = 0;
+
+  return true;
 }
 
 void ButtonControls::loop()

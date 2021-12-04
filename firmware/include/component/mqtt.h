@@ -18,7 +18,7 @@ class MqttClient: public Component
     public:
         MqttClient();
 
-        void setup();
+        bool setup();
         void loop();
 
         void tele(const char* topic, const char* message, bool retain = false);

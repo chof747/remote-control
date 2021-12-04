@@ -9,20 +9,21 @@
 #include "Adafruit_SSD1306.h"
 #include "Adafruit_GFX.h"
 
-#define GROUND_LINE 5
+#define GROUND_LINE 3
 #define Y_ADVANCE 10
 
 Adafruit_SSD1306 device = Adafruit_SSD1306(DISPLAY_WIDTH, DISPLAY_HEIGHT, &Wire);
 
 #define MODULE "DISPLAY"
 
-void Display::setup()
+bool Display::setup()
 //****************************************************************************************
 {
     //Wire.begin(5, 4);
     if (!device.begin())
     {
         Log.error(MODULE, "Display could not be started!");
+        return false;
     }
     else
     {
@@ -35,7 +36,9 @@ void Display::setup()
         device.setTextWrap(false);
         device.setTextColor(SSD1306_WHITE);
 
+        device.display();
         changed = true;
+        return true;
     }
 }
 
@@ -98,7 +101,7 @@ bool Display::printtoinv(uint8_t line, const char *text)
 //****************************************************************************************
 {
     bool result = false;
-    device.fillRect(0, (line - 1) * Y_ADVANCE, device.width(), line * fontData.yAdvance * 3 / 4 + 1, SSD1306_WHITE);
+    device.fillRect(0, (line - 1) * Y_ADVANCE, device.width(), line * Y_ADVANCE +1, SSD1306_WHITE);
     device.setTextColor(SSD1306_BLACK);
     result = printto(line, text);
     device.setTextColor(SSD1306_WHITE);

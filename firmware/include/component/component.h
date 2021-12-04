@@ -5,7 +5,7 @@ class Component
 {
 
     public:
-        virtual void setup() = 0;
+        virtual bool setup() = 0;
         virtual void afterSetup() {}
         virtual void loop()  = 0;
 

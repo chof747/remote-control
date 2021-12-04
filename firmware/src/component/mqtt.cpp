@@ -1,5 +1,7 @@
 #include "component/mqtt.h"
 #include "component/wifi.h"
+#include "component/status.h"
+#include "component/display.h"
 #include <ESP8266WiFi.h> // ESP8266 WiFi driver
 #include "logger.h"
 
@@ -20,7 +22,7 @@ MqttClient::MqttClient() : client(esp_client), mqttClientId()
 
 }
 
-void MqttClient::setup()
+bool MqttClient::setup()
 //****************************************************************************************
 {
     MQTT_CALLBACK_SIGNATURE = std::bind(&MqttClient::subscriptionCallback, 
@@ -34,7 +36,7 @@ void MqttClient::setup()
     client.setBufferSize(255);
 
     Log.info(MODULE, "Initializing MQTT connection to: %s", MQTT_BROKER);
-    reconnect();
+    return reconnect();
 }
 
 void MqttClient::loop()
@@ -104,6 +106,8 @@ bool MqttClient::reconnect()
         sprintf(mqttClientId, "alarmc-%x", ESP.getChipId());
         int counter = 0;
 
+        int errcode = 0;
+
         while ((!client.connected()) && (counter < 3))
         {
             Log.info(MODULE, "Attempting MQTT connection to %s as %s ... ", 
@@ -115,8 +119,9 @@ bool MqttClient::reconnect()
             }
             else
             {
+                errcode = client.state();
                 Log.warn(MODULE, "failed to connect to %s, rc was %d", 
-                         MQTT_BROKER, client.state());
+                         MQTT_BROKER, errcode);
                 delay(5000);
             }
 
@@ -128,6 +133,12 @@ bool MqttClient::reconnect()
             Log.error(MODULE, 
                       "Could not reconnect to MQTT broker %s - please check the connections and reboot", 
                       MQTT_BROKER);
+
+            display.clear();
+            display.printtoinv(1, "MQTT Error");
+            display.printto(2, "Err. Code: %d", errcode);
+            statusComponent.toggleLowPowerLed(true); 
+            statusComponent.toggleConnectionLed(false);
             return false;
         }
         else
@@ -135,6 +146,9 @@ bool MqttClient::reconnect()
             return true;
         }
     }
+
+    statusComponent.toggleConnectionLed(client.connected());
+
     return true;
 }
 

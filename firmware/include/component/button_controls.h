@@ -15,7 +15,7 @@ struct btnStateType {
 class ButtonControls: public Component
 {
   public:
-    void setup();
+    boolean setup();
     void loop();
 
     void setController(ButtonController* controller);

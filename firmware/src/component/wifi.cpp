@@ -1,11 +1,13 @@
 #include "component/wifi.h"
+#include "component/status.h"
+#include "component/display.h"
 #include <ESP8266WiFi.h>
 #include "config.h"
 #include "logger.h"
 
 #define MODULE "WIFI"
 
-void WifiManager::setup()
+bool WifiManager::setup()
 {
     Log.info(MODULE,"Connecting to WiFi");
 
@@ -13,15 +15,31 @@ void WifiManager::setup()
     Log.info(MODULE, "Connecting to %s ... ", WIFI_SSID);
     delay(100);
 
-    while (WiFi.status() != WL_CONNECTED) 
+    uint8_t count = 0;
+
+    while ((WiFi.status() != WL_CONNECTED) && (count < 20))
     {   
         // Wait for the Wi-Fi to connect
         Log.warn(MODULE, "Connection failed retrying to connect to %s in 1s ...", WIFI_SSID);
         delay(1000);
+        count++;
     }
 
-    Log.info(MODULE, "Connection established.");
-    Log.info(MODULE, "IP address: %s", WiFi.localIP().toString().c_str());
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        Log.info(MODULE, "Connection established.");
+        Log.info(MODULE, "IP address: %s", WiFi.localIP().toString().c_str());
+        return true;
+    }
+    else
+    {
+        display.clear();
+        display.printtoinv(1, "Connection Error");
+        statusComponent.toggleConnectionLed(false);
+        statusComponent.toggleLowPowerLed(true);
+        return false;
+    }
+
 }
 
 void WifiManager::loop() 
