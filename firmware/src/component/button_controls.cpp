@@ -38,6 +38,8 @@ void ButtonControls::loop()
 {
   uint16_t newState = readButtons();
   long t = millis();
+
+  //Log.debug(MODULE, "nstate = %d, state = %d", newState, state);
   
   if ((newState != state) && (DEBOUNCE_TIME < (t - eventTime)))
   {

@@ -82,6 +82,6 @@ void RemoteController::onClick(btnStateType state)
 
    }
 
-   startTimer(5000);
+   startTimer(PRESS_MSG_TIME);
 
 }
