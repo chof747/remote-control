@@ -15,6 +15,7 @@ class Display: public Component
         bool printtoinv(uint8_t line, const char* text);
         uint16_t printwrap(uint8_t lineStart, const char* text);
   
+        void show();
 
         uint8_t getMaxLines();
         void clear();
