@@ -13,6 +13,9 @@ bool WifiManager::setup()
 
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);             // Connect to the network
     Log.info(MODULE, "Connecting to %s ... ", WIFI_SSID);
+    display.clear();
+    display.printto(1, "Verbinde WLAN ...");
+    display.show();
     delay(100);
 
     uint8_t count = 0;
