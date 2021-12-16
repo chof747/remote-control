@@ -5,30 +5,37 @@
 #include "component.h"
 #include <Arduino.h>
 
-class Status: public Component
+class Status : public Component
 {
-    public:
-        static const int LED_CONN = CONN_LED_PIN;
-        static const int LED_LOWP = LOWP_LED_PIN;
+public:
+    static const int LED_CONN = CONN_LED_PIN;
+    static const int LED_LOWP = LOWP_LED_PIN;
 
-        bool setup();
-        void afterSetup();
-        void loop();
+    bool setup();
+    void afterSetup();
+    void loop();
 
-        void toggleConnectionLed(boolean on);
-        void toggleLowPowerLed(boolean on);
+    void toggleConnectionLed(boolean on);
+    void toggleLowPowerLed(boolean on);
 
-        boolean isConnected();
-        boolean isLowPower();
+    boolean isConnected();
+    boolean isLowPower();
 
-    private:
+    double_t getBatteryLevel();
+    const char* getBatteryStatus();
 
-        boolean connectionStatus;
-        boolean lowPowerStatus;
+private:
+    boolean connectionStatus;
+    boolean lowPowerStatus;
 
+    double_t voltage;
+    int adcValue;
+    double_t percent;
+    char batStatus[16];
+
+    void readVoltage();
 };
 
 extern Status statusComponent;
-
 
 #endif //STATUS_H

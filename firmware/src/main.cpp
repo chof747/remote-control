@@ -10,6 +10,7 @@
 #include "controller/base.h"
 #include "controller/idle_controller.h"
 #include "controller/remote_controller.h"
+#include "controller/device_data_controller.h"
 #include "controller/idle_controller.h"
 
 #define MAX_COMPONENTS 5
@@ -25,6 +26,7 @@ void onNextController(ControllerBase *active)
 
 IdleController idle(&onNextController);
 RemoteController remote(&buttonControls, &idle, &onNextController);
+DeviceDataController deviceData(&buttonControls, &idle, &onNextController);
 
 void setup()
 //****************************************************************************************
@@ -57,6 +59,9 @@ void setup()
   }
 
   mqttClient.stat(MQTT_ACTIVATION_MSG, "active", true);
+  remote.setNext(&deviceData);
+  deviceData.setNext(&remote);
+
   activeController = &remote;
   activeController->activate();
 }

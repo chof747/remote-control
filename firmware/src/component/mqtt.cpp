@@ -110,9 +110,22 @@ bool MqttClient::reconnect()
 
         while ((!client.connected()) && (counter < 3))
         {
-            Log.info(MODULE, "Attempting MQTT connection to %s as %s ... ", 
-                     MQTT_BROKER, MQTT_USER);
-            if (client.connect(mqttClientId,  MQTT_USER, MQTT_PASSWORD))
+            display.clear();
+            display.printto(1, "Verbinde MQTT ...");
+            display.show();
+            bool connected;
+            if (MQTT_USER != NULL)
+            {
+                Log.info(MODULE, "Attempting MQTT connection to %s as %s ... ", 
+                    MQTT_BROKER, MQTT_USER);
+                connected = client.connect(mqttClientId,  MQTT_USER, MQTT_PASSWORD);
+   }
+            else
+            {
+                Log.info(MODULE, "Attempting MQTT connection to %s as anonymous ... ", MQTT_BROKER);
+                connected = client.connect(mqttClientId);
+            }
+            if (connected)
             {
                 Log.info(MODULE, "connected to %s", MQTT_BROKER);
                 stat("status", "connected");
@@ -143,6 +156,8 @@ bool MqttClient::reconnect()
         }
         else
         {
+            display.clear();
+            display.show();
             return true;
         }
     }

@@ -81,6 +81,10 @@ void RemoteController::onClick(btnStateType state)
        mqttClient.stat(btntopic, "TOGGLE");
 
    }
+   else
+   {
+       gotoNext();
+   }
 
    startTimer(PRESS_MSG_TIME);
 
