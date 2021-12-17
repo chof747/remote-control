@@ -3,6 +3,7 @@
 #include "component/status.h"
 #include "logger.h"
 #include "component/display.h"
+#include "component/ota.h"
 #include "config.h"
 #include <ESP8266WiFi.h>
 
@@ -17,7 +18,7 @@
 
 DeviceDataController::DeviceDataController(ButtonControls *buttons, ControllerBase *timeout, activation_cb_t cb)
     : ControllerBase(cb), ButtonController(buttons), TimeOutController(DEEP_SLEEP_AFTER), timeoutTarget(timeout),
-      label(""), value(""), index(1)
+      label(""), value(""), index(1), expectingOTA(false)
 //*********************************************************************************
 {
 }
@@ -34,14 +35,14 @@ void DeviceDataController::activate()
 void DeviceDataController::loop()
 //*********************************************************************************
 {
-    if (0 != label.compareTo(""))
+    if ((0 != label.compareTo("")) && (!expectingOTA))
     {
         display.printtoinv(1, label.c_str());
         display.printto(2, value.c_str());
         label = "";
     }
 
-    if (checkTimeForTimeOut())
+    if ((checkTimeForTimeOut()) && (!expectingOTA))
     {
         gotoController(timeoutTarget);
     }
@@ -58,21 +59,33 @@ void DeviceDataController::onClick(btnStateType state)
     }
     else if (state.pushButtons[0])
     {
-        index = (--index == 0) ? MAX_INDICES  : index;
+        index = (--index == 0) ? MAX_INDICES : index;
+        obtainDeviceData(index);
     }
     else if (state.pushButtons[2])
     {
         index = (++index > MAX_INDICES) ? 1 : index;
+        obtainDeviceData(index);
     }
-
-    obtainDeviceData(index);
+    else if (state.pushButtons[9])
+    {
+        expectingOTA = !expectingOTA;
+        if (expectingOTA)
+        {
+            display.printtoinv(1, "Update");
+        }
+        else
+        {
+            obtainDeviceData(index);
+        }
+    }
 }
 
 void DeviceDataController::obtainDeviceData(uint8_t ix)
 {
     switch (ix)
     {
-    
+
     case BATTERY_STATUS:
         label = "Batterie";
         value = statusComponent.getBatteryStatus();

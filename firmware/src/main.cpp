@@ -6,6 +6,7 @@
 #include "component/mqtt.h"
 #include "component/button_controls.h"
 #include "component/display.h"
+#include "component/ota.h"
 
 #include "controller/base.h"
 #include "controller/idle_controller.h"
@@ -13,7 +14,7 @@
 #include "controller/device_data_controller.h"
 #include "controller/idle_controller.h"
 
-#define MAX_COMPONENTS 5
+#define MAX_COMPONENTS 6
 
 Component *components[MAX_COMPONENTS];
 ControllerBase *activeController = NULL;
@@ -39,6 +40,7 @@ void setup()
   components[2] = &buttonControls;
   components[3] = &wifiManager;
   components[4] = &mqttClient;
+  components[5] = &ota;
 
   for (int i = 0; i < MAX_COMPONENTS; ++i)
   {
