@@ -1,3 +1,0 @@
-ota_server = localhost
-ota_user = USERNAME
-ota_path = PATH_TO_OTA_FILE_LOCATION
