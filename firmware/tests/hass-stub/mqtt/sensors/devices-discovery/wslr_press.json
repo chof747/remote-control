@@ -1,0 +1,15 @@
+{
+    "platform": "mqtt",
+    "state_topic": "home/livingroom/airpressure",
+    "unit_of_measurement": "mbar",
+    "name": "Living Room Airpressure",
+    "device_class": "pressure",
+    "uniq_id": "wslr_airp",
+    "device" : {
+        "identifiers" : [
+            "wslr"
+        ],
+        "name" : "Weather Station Living Room",
+        "suggested_area" : "Wohnzimmer"
+    }
+}

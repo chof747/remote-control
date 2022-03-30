@@ -1,0 +1,43 @@
+version: "3.7"
+
+services:
+  homeassistant:
+    container_name: homeassistant
+    restart: unless-stopped
+    image: homeassistant/home-assistant
+    volumes:
+      - ./hass-config:/config
+      - /private/etc/localtime:/etc/localtime:ro
+    privileged: true
+    environment:
+      - PUID=502
+      - PGID=staff
+      - TZ=Europe/Vienna
+    ports: 
+      - 1890:8123
+    networks:
+      remotectrllan:
+        aliases:
+          - hass
+
+  mqtt-broker:
+    image: eclipse-mosquitto
+    container_name: hass-mqtt-dev
+    ports:
+      - 1883:1883
+      - 8883:8883
+    networks:
+      remotectrllan:
+        aliases:
+          - mqtt
+    environment:
+      - PUID=502
+      - PGID=staff
+    volumes:
+      - ./mqtt:/mosquitto
+      - ./mqtt-crontab:/etc/crontabs/root
+
+networks:
+  remotectrllan:
+    name: remotectrllan
+    

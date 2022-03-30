@@ -1,0 +1,15 @@
+{
+    "platform": "mqtt",
+    "state_topic": "home/sleepingroom/temperature_bed",
+    "unit_of_measurement": "°C",
+    "name": "Bed Temperatur",
+    "device_class": "temperature",
+    "uniq_id": "wssr_tempbed",
+    "device" : {
+        "identifiers" : [
+            "wssr"
+        ],
+        "name" : "Weather Station Bed room",
+        "suggested_area" : "Schlafzimmer"
+    }
+}

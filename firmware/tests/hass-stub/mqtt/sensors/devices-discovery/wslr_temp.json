@@ -1,0 +1,15 @@
+{
+    "platform": "mqtt",
+    "state_topic": "home/livingroom/temperature",
+    "unit_of_measurement": "°C",
+    "name": "Living Room Temperatur",
+    "device_class": "temperature",
+    "uniq_id": "wslr_temp",
+    "device" : {
+        "identifiers" : [
+            "wslr"
+        ],
+        "name" : "Weather Station Living Room",
+        "suggested_area" : "Wohnzimmer"
+    }
+}

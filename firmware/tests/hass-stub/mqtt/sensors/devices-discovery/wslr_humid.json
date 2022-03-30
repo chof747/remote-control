@@ -1,0 +1,15 @@
+{
+    "platform": "mqtt",
+    "state_topic": "home/livingroom/humidity",
+    "unit_of_measurement": "%",
+    "name": "Living Room Humidity",
+    "device_class": "humidity",
+    "uniq_id": "wslr_humd",
+    "device" : {
+        "identifiers" : [
+            "wslr"
+        ],
+        "name" : "Weather Station Living Room",
+        "suggested_area" : "Wohnzimmer"
+    }
+}
