@@ -7,6 +7,7 @@ services:
     image: homeassistant/home-assistant
     volumes:
       - ./hass-config:/config
+      - $CUSTOM_COMPONENTS_PATH:/config/custom_components
       - /private/etc/localtime:/etc/localtime:ro
     privileged: true
     environment:
