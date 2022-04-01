@@ -80,7 +80,7 @@ void Status::readVoltage()
   }
   else
   {
-    sprintf(batStatus, "Bat: %3.0f% %", percent);    
+    sprintf(batStatus, "Bat: %3.0f%%", percent);    
   }
   
   Log.debug(MODULE, "A0 value = %d", adcValue);

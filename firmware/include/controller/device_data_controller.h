@@ -20,12 +20,12 @@ class DeviceDataController: public ControllerBase, ButtonController, TimeOutCont
 
     void obtainDeviceData(uint8_t ix);
 
-    bool expectingOTA;
-
     ControllerBase* timeoutTarget;
     String label;
     String value;
     uint8_t index;
+    bool expectingOTA;
+
 };
 
 #endif //DEVICE_CONTROLLER_H

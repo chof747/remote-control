@@ -4,6 +4,7 @@
 #include "component/status.h"
 #include "component/wifi.h"
 #include "component/mqtt.h"
+#include "component/home_assistant.h"
 #include "component/button_controls.h"
 #include "component/display.h"
 #include "component/ota.h"
@@ -14,7 +15,7 @@
 #include "controller/device_data_controller.h"
 #include "controller/idle_controller.h"
 
-#define MAX_COMPONENTS 6
+#define MAX_COMPONENTS 7
 
 Component *components[MAX_COMPONENTS];
 ControllerBase *activeController = NULL;
@@ -40,7 +41,8 @@ void setup()
   components[2] = &buttonControls;
   components[3] = &wifiManager;
   components[4] = &mqttClient;
-  components[5] = &ota;
+  components[5] = &homeAssistantClient;
+  components[6] = &ota;
 
   for (int i = 0; i < MAX_COMPONENTS; ++i)
   {
